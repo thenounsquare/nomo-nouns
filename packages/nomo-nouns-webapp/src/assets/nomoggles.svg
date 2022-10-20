@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 20 8" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <path d="M11,8L11,4L12,4L12,8L20,8L20,0L12,0L12,3L11,3L11,0L3,0L3,3L0,3L0,6L1,6L1,4L3,4L3,8L11,8Z" style="fill:rgb(255,0,0);"/>
+    <g>
+        <path d="M6,1L4,1L4,4L5,4L5,2L6,2L6,1ZM7,2L6,2L6,4L7,4L7,2Z" style="fill:white;"/>
+        <path d="M8,7L10,7L10,4L7,4L7,6L8,6L8,5L9,5L9,6L8,6L8,7Z" style="fill:white;"/>
+        <path d="M8,4L10,4L10,1L7,1L7,3L8,3L8,2L9,2L9,3L8,3L8,4Z"/>
+        <path d="M6,5L6,4L4,4L4,5L5,5L5,6L6,6L6,7L7,7L7,5L6,5Z"/>
+    </g>
+    <g>
+        <path d="M15,1L13,1L13,4L14,4L14,2L15,2L15,1ZM16,2L15,2L15,4L16,4L16,2Z" style="fill:white;"/>
+        <path d="M17,7L19,7L19,4L16,4L16,6L17,6L17,5L18,5L18,6L17,6L17,7Z" style="fill:white;"/>
+        <path d="M17,4L19,4L19,1L16,1L16,3L17,3L17,2L18,2L18,3L17,3L17,4Z"/>
+        <path d="M15,5L15,4L13,4L13,5L14,5L14,6L15,6L15,7L16,7L16,5L15,5Z"/>
+    </g>
+</svg>

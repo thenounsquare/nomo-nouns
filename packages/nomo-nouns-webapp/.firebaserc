@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "nomo-nouns-dev",
+    "dev": "demo-nomo-nouns",
+    "preview": "nomo-nouns-dev",
+    "prod": "nomo-nouns-prod"
+  }
+}
