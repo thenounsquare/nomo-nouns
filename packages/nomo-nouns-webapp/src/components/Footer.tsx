@@ -1,29 +1,14 @@
-import {
-  Button,
-  Center,
-  chakra,
-  Heading,
-  HStack,
-  IconButton,
-  Image,
-  keyframes,
-  Link,
-  Text,
-  Tooltip,
-  useBreakpointValue,
-  useColorMode,
-} from "@chakra-ui/react";
-import Nomoggles from "../assets/nomoggles.svg";
-import { HiUsers, MdMusicNote, MdMusicOff } from "react-icons/all";
+import { HStack, Image, Link, Text, Tooltip } from "@chakra-ui/react";
+import volky from "../assets/volky.png";
+import { FaDiscord, FaGithub, FaTwitter, HiUsers } from "react-icons/all";
 import { ConnectKitButton } from "connectkit";
-import { MoonIcon, SunIcon } from "@chakra-ui/icons";
-import { useAppState } from "../state/appState";
 import { useActiveUserCount } from "../hooks/session";
-import { useState } from "react";
 import { useIsMobile } from "../hooks/isMobile";
+import { EtherscanIcon, OpenSeaIcon } from "./Icons";
 
 export const Footer = () => {
   const activeUserCount = useActiveUserCount();
+  const isMobile = useIsMobile();
 
   return (
     <HStack
@@ -31,10 +16,11 @@ export const Footer = () => {
       bgColor={"var(--chakra-colors-chakra-body-bg)"}
       w={"full"}
       p={2}
-      justifyContent={"space-between"}
+      justifyContent={isMobile ? "space-between" : "end"}
     >
-      <ConnectKitButton label={"Connect to play"} />
-      {activeUserCount && (
+      {isMobile && <ConnectKitButton label={"Connect to play"} />}
+
+      {isMobile && activeUserCount && activeUserCount > 0 && (
         <Tooltip hasArrow label={"Connected players"}>
           <HStack>
             <Text>{activeUserCount}</Text>
@@ -42,13 +28,33 @@ export const Footer = () => {
           </HStack>
         </Tooltip>
       )}
+
       <HStack>
         <Link isExternal href={"https://twitter.com/thenounsquare"}>
-          <Button fontSize={"xs"}>NOC</Button>
+          <FaTwitter size={24} />
         </Link>
-        <Link isExternal href={"https://fomonouns.wtf/"}>
-          <Button fontSize={"xs"}>FOMO</Button>
+        <Link isExternal href={"discord.gg/qanyJqydYt"}>
+          <FaDiscord size={24} />
         </Link>
+        <Link isExternal href={"https://opensea.io/collection/nomo-nouns"}>
+          <OpenSeaIcon boxSize={"24px"} />
+        </Link>
+        <Link
+          isExternal
+          href={
+            "https://etherscan.io/address/0xbe37CC3F8f7E1E4C264Ba5818482fA75e2D1823e"
+          }
+        >
+          <EtherscanIcon boxSize={"24px"} />
+        </Link>
+        <Link isExternal href={"https://github.com/volkyeth/nomo-nouns"}>
+          <FaGithub size={24} />
+        </Link>
+        <Tooltip hasArrow label={"by Volky"}>
+          <Link isExternal href={"https://twitter.com/volkyeth"}>
+            <Image src={volky} h={"24px"} />
+          </Link>
+        </Tooltip>
       </HStack>
     </HStack>
   );

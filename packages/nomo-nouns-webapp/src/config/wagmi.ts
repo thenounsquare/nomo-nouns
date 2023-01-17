@@ -1,6 +1,4 @@
-import { Chain, chain, Client, configureChains, createClient } from "wagmi";
-import { getDefaultClient } from "connectkit";
-import { publicProvider } from "wagmi/providers/public";
+import { chain, configureChains, createClient } from "wagmi";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";

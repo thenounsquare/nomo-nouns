@@ -1,7 +1,6 @@
 import { useFirebaseState } from "../state/firebaseState";
-import { useObjectVal, useListVals } from "react-firebase-hooks/database";
-import { FinishedMatch, MatchData } from "../../common/match";
-import { ref, query, limitToLast, get, onValue } from "firebase/database";
+import { FinishedMatch } from "../../common/match";
+import { get, limitToLast, onValue, query, ref } from "firebase/database";
 import {
   Heading,
   HStack,
@@ -12,8 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { NounSeed } from "@nouns/assets/dist/types";
 import { useNomoImage } from "./NomoImage";
-import { FC, useEffect, useMemo, useState } from "react";
-import { useQuery } from "react-query";
+import { FC, useEffect, useState } from "react";
 
 export const PreviousNomos = () => {
   const database = useFirebaseState((state) => state.db);

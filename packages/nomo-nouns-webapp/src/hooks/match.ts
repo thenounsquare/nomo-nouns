@@ -11,7 +11,7 @@ import {
 import { get, push, ref, set } from "firebase/database";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
 import { useCallback, useEffect, useRef } from "react";
-import { useAccount, useProvider, useSigner } from "wagmi";
+import { useProvider, useSigner } from "wagmi";
 import { currentTimestamp } from "./useTimestamp";
 import { getGoerliSdk, getMainnetSdk } from "nomo-nouns-contract-sdks";
 import { useQuery } from "react-query";

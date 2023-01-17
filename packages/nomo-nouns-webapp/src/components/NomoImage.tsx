@@ -1,5 +1,5 @@
 import { NounSeed } from "@nouns/assets/dist/types";
-import { FC, useMemo } from "react";
+import { useMemo } from "react";
 import { getNounData, ImageData } from "@nouns/assets";
 import { buildSVG } from "@nouns/sdk";
 
