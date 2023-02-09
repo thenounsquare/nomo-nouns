@@ -39,6 +39,13 @@ export const SellingPhase: FC<SellingPhaseProps> = ({ match }) => {
   const { isDisconnected } = useAccount();
   const saleOver = match.status === "Finished";
   const nextMatch = useStartNextMatch();
+  const fomoRef = useRef<HTMLIFrameElement>(null);
+  useEffect(() => {
+    if (!saleOver || !fomoRef.current) return;
+
+    fomoRef.current.scrollIntoView();
+  }, [saleOver]);
+
   // @ts-ignore
   return (
     <VStack h={"full"} spacing={[6, 10]} w={"full"}>
@@ -86,6 +93,7 @@ export const SellingPhase: FC<SellingPhaseProps> = ({ match }) => {
           )}
         </VStack>
         <chakra.iframe
+          ref={fomoRef}
           gridArea={"noun"}
           id={"noun"}
           borderRadius={"md"}
