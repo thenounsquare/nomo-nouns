@@ -58,7 +58,8 @@ export const SellingPhase: FC<SellingPhaseProps> = ({ match }) => {
            "noun nomo"`,
         ]}
         templateColumns={["352px", "352px 352px"]}
-        gridGap={4}
+        columnGap={{ base: 4, sm: 8, lg: 24 }}
+        rowGap={4}
         justifyContent={"center"}
         justifyItems={"center"}
         alignItems={"end"}
