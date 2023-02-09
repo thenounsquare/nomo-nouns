@@ -33,7 +33,7 @@ export const Footer = () => {
         <Link isExternal href={"https://twitter.com/thenounsquare"}>
           <FaTwitter size={24} />
         </Link>
-        <Link isExternal href={"discord.gg/qanyJqydYt"}>
+        <Link isExternal href={"https://discord.gg/qanyJqydYt"}>
           <FaDiscord size={24} />
         </Link>
         <Link isExternal href={"https://opensea.io/collection/nomo-nouns"}>
