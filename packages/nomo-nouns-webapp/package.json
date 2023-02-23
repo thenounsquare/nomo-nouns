@@ -3,7 +3,8 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "dev": "vite --mode emulator",
+    "dev": "vite --mode preview",
+    "dev:emulator": "vite --mode emulator",
     "emulator": "firebase --project dev emulators:start --import=./fixtures",
     "build": "tsc && vite build",
     "preview": "vite preview"

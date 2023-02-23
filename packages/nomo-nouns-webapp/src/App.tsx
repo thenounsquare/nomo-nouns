@@ -1,12 +1,4 @@
-import {
-  Center,
-  Container,
-  Image,
-  keyframes,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
-import Nomoggles from "./assets/nomoggles.svg";
+import { Center, keyframes, VStack } from "@chakra-ui/react";
 import { MatchSection } from "./components/MatchSection";
 import { useIdleDetection } from "./hooks/session";
 import { Header } from "./components/Header";
@@ -36,7 +28,7 @@ function App() {
     >
       <Header />
       <MatchSection />
-      {isMobile && <Footer />}
+      <Footer />
     </VStack>
   );
 }

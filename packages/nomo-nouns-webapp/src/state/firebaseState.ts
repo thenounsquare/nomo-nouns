@@ -1,14 +1,14 @@
 import create from "zustand";
-import { initializeApp, FirebaseApp } from "firebase/app";
+import { initializeApp } from "firebase/app";
 import {
-  getDatabase,
   connectDatabaseEmulator,
   Database,
+  getDatabase,
 } from "firebase/database";
 import {
+  connectFunctionsEmulator,
   Functions,
   getFunctions,
-  connectFunctionsEmulator,
 } from "firebase/functions";
 import { getFirebaseConfig } from "../config/firebase";
 

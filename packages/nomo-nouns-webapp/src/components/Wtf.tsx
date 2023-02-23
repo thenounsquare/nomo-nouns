@@ -1,4 +1,4 @@
-import { Accordion, Heading, Text } from "@chakra-ui/react";
+import { Heading, Text } from "@chakra-ui/react";
 
 export const Wtf = () => {
   return (

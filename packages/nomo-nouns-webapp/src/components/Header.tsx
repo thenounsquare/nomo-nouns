@@ -1,15 +1,12 @@
 import {
-  Button,
   chakra,
   Heading,
   HStack,
   IconButton,
   Image,
   keyframes,
-  Link,
   Text,
   Tooltip,
-  useBreakpointValue,
   useColorMode,
 } from "@chakra-ui/react";
 import Nomoggles from "../assets/nomoggles.svg";
@@ -89,17 +86,7 @@ export const Header = () => {
             transition={"min-width 1s"}
           />
         </Tooltip>
-        {!isMobile && (
-          <>
-            <Link isExternal href={"https://twitter.com/thenounsquare"}>
-              <Button>Noun O'Clock</Button>
-            </Link>
-            <Link isExternal href={"https://fomonouns.wtf/"}>
-              <Button>FomoNouns</Button>
-            </Link>
-            <ConnectKitButton label={"Connect to play"} />
-          </>
-        )}
+        {!isMobile && <ConnectKitButton label={"Connect to play"} />}
         <IconButton
           aria-label={"ColorMode"}
           onClick={toggleColorMode}
