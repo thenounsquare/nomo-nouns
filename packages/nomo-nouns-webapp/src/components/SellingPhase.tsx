@@ -86,7 +86,7 @@ export const SellingPhase: FC<SellingPhaseProps> = ({ match }) => {
           <Text fontSize={"sm"}>
             Born {new Date(match.matchEnd * 1000).toDateString()}
           </Text>
-          {!saleOver && (
+          {!saleOver && BigNumber.from(match.mintingPriceIncreasePerInterval).gt(0) && (
             <Text fontSize={["xs", "sm"]}>
               The sooner you mint, the cheaper it is!
             </Text>

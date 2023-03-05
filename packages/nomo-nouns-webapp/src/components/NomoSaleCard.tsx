@@ -59,13 +59,22 @@ export const NomoSaleCard: FC<NomoSaleCardProps> = ({ match, ...props }) => {
       ? undefined
       : () => {
           setIsMinting(true);
-          mintNomo(mintQuantity).finally(() => setIsMinting(false));
+          mintNomo?.(mintQuantity).finally(() => setIsMinting(false));
         };
+  const isStaticPrice = BigNumber.from(match.mintingPriceIncreasePerInterval).eq(0)
   const mintPrice = getMintPrice(now, match);
   const totalCost = mintPrice.mul(mintQuantity);
   const totalCostString = formatEther(totalCost);
   const hasFundsToMint = !balance || balance.value.gte(totalCost);
   const saleOver = match.status === "Finished";
+
+  console.log({
+        isDisconnected ,
+      hasFundsToMint ,
+      canMint ,
+      isMinting ,
+      saleOver
+  })
   return (
     <VStack alignItems={"center"} spacing={0} {...props}>
       <NomoCard
@@ -85,12 +94,11 @@ export const NomoSaleCard: FC<NomoSaleCardProps> = ({ match, ...props }) => {
           borderTopWidth={0}
           p={0}
           borderRadius={"md"}
-          borderTopRadius={0}
           spacing={0}
         >
           <HStack p={4} w={"full"} justifyContent={"space-between"}>
-            <Stat textAlign={saleOver ? "center" : undefined} w={10}>
-              <StatLabel>{saleOver ? "Last price" : "Current Price"}</StatLabel>
+            <Stat textAlign={isStaticPrice || saleOver ? "center" : undefined} w={10}>
+              <StatLabel>{isStaticPrice ? "Price" : saleOver ? "Last price" : "Current Price"}</StatLabel>
               <StatNumber>{formatEther(mintPrice)} ETH</StatNumber>
               <StatHelpText mb={0}>
                 {ethPriceAvailable ? (
@@ -100,7 +108,7 @@ export const NomoSaleCard: FC<NomoSaleCardProps> = ({ match, ...props }) => {
                 )}
               </StatHelpText>
             </Stat>
-            {!saleOver && (
+            {!isStaticPrice && !saleOver && (
               <Stat textAlign={"end"}>
                 <StatLabel>Price in {priceIncreaseCountdown}</StatLabel>
                 <StatNumber>
