@@ -1,5 +1,4 @@
 import {
-  MockAuctionHouse,
   MockDescriptor,
   NomoNounsSeeder,
   NomoNounsToken,
@@ -13,7 +12,6 @@ const { ethers } = require("hardhat");
 describe("NOMO NOUNS Token Testing", async () => {
   let nomoNouns: NomoNounsToken;
   let nomoNounsSeeder: NomoNounsSeeder;
-  let mockAuctionHouse: MockAuctionHouse;
   let mockDescriptor: MockDescriptor;
   let owner: SignerWithAddress;
   let nonOwner: SignerWithAddress;
@@ -43,10 +41,6 @@ describe("NOMO NOUNS Token Testing", async () => {
 
   beforeEach(async () => {
     [owner, nonOwner] = await ethers.getSigners();
-    const MockAuctionHouse = await ethers.getContractFactory(
-      "MockAuctionHouse"
-    );
-    mockAuctionHouse = await MockAuctionHouse.deploy();
 
     const MockDescriptor = await ethers.getContractFactory("MockDescriptor");
     mockDescriptor = await MockDescriptor.deploy();
@@ -61,15 +55,12 @@ describe("NOMO NOUNS Token Testing", async () => {
       2500000000000000,
       owner.address,
       owner.address,
-      mockAuctionHouse.address,
       nomoNounsSeeder.address,
       mockDescriptor.address
     );
 
     domain.verifyingContract = nomoNouns.address;
 
-    // prepare Auction House
-    await mockAuctionHouse.createAuction(nounId, startTime, endTime, settled);
   });
 
   describe("Deployment", async () => {
@@ -77,7 +68,6 @@ describe("NOMO NOUNS Token Testing", async () => {
       expect(nomoNounsSeeder.address).to.not.equal("");
       expect(nomoNouns.address).to.not.equal("");
       expect(mockDescriptor.address).to.not.equal("");
-      expect(mockAuctionHouse.address).to.not.equal("");
     });
   });
 
@@ -98,11 +88,6 @@ describe("NOMO NOUNS Token Testing", async () => {
       await nomoNouns.setSeeder(nomoNounsSeeder.address);
 
       expect(await nomoNouns.seeder()).to.eq(nomoNounsSeeder.address);
-    });
-
-    it("Auction House should", async () => {
-      // await nomoNouns.setSeeder(nomoNounsSeeder.address);
-      expect(await nomoNouns.auctionHouse()).to.eq(mockAuctionHouse.address);
     });
 
     it("Withdraw should WITHDRAW_NO_BALANCE", async () => {

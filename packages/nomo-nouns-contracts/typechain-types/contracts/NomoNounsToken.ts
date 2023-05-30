@@ -80,7 +80,6 @@ export interface NomoNounsTokenInterface extends utils.Interface {
   functions: {
     "_verify(uint256,bytes32,uint256,uint256,bytes)": FunctionFragment;
     "approve(address,uint256)": FunctionFragment;
-    "auctionHouse()": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
     "contractURI()": FunctionFragment;
     "dataURI(uint256)": FunctionFragment;
@@ -130,7 +129,6 @@ export interface NomoNounsTokenInterface extends utils.Interface {
     nameOrSignatureOrTopic:
       | "_verify"
       | "approve"
-      | "auctionHouse"
       | "balanceOf"
       | "contractURI"
       | "dataURI"
@@ -189,10 +187,6 @@ export interface NomoNounsTokenInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "approve",
     values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "auctionHouse",
-    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "balanceOf",
@@ -375,10 +369,6 @@ export interface NomoNounsTokenInterface extends utils.Interface {
 
   decodeFunctionResult(functionFragment: "_verify", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "auctionHouse",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "contractURI",
@@ -636,8 +626,6 @@ export interface NomoNounsToken extends BaseContract {
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    auctionHouse(overrides?: CallOverrides): Promise<[string]>;
-
     balanceOf(
       owner: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -858,8 +846,6 @@ export interface NomoNounsToken extends BaseContract {
     overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  auctionHouse(overrides?: CallOverrides): Promise<string>;
-
   balanceOf(
     owner: PromiseOrValue<string>,
     overrides?: CallOverrides
@@ -1077,8 +1063,6 @@ export interface NomoNounsToken extends BaseContract {
       tokenId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
-
-    auctionHouse(overrides?: CallOverrides): Promise<string>;
 
     balanceOf(
       owner: PromiseOrValue<string>,
@@ -1363,8 +1347,6 @@ export interface NomoNounsToken extends BaseContract {
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    auctionHouse(overrides?: CallOverrides): Promise<BigNumber>;
-
     balanceOf(
       owner: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -1576,8 +1558,6 @@ export interface NomoNounsToken extends BaseContract {
       tokenId: PromiseOrValue<BigNumberish>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
-
-    auctionHouse(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     balanceOf(
       owner: PromiseOrValue<string>,

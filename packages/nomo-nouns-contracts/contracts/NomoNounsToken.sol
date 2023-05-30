@@ -8,7 +8,6 @@ import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol';
 import {IERC721A, ERC721A} from "erc721a/contracts/ERC721A.sol";
 import {ERC721AQueryable} from "erc721a/contracts/extensions/ERC721AQueryable.sol";
-import {INounsAuctionHouseExtra} from './interfaces/INounsAuctionHouseExtra.sol';
 import {INomoNounsSeeder} from "./interfaces/INomoNounsSeeder.sol";
 import {INomoNounsDescriptor} from "./interfaces/INomoNounsDescriptor.sol";
 
@@ -30,9 +29,6 @@ contract NomoNounsToken is ERC721A, ERC721AQueryable, EIP712, Ownable {
 
     // The Nouns token seeder
     INomoNounsSeeder public seeder;
-
-    // The Nouns token seeder
-    INounsAuctionHouseExtra public auctionHouse;
 
     // The noun seeds
     mapping(uint256 => INomoNounsSeeder.Seed) public seeds;
@@ -64,7 +60,6 @@ contract NomoNounsToken is ERC721A, ERC721AQueryable, EIP712, Ownable {
         uint256 _mintingPriceIncreasePerInterval,
         address _withdrawWallet,
         address _signer,
-        INounsAuctionHouseExtra _auctionHouse,
         INomoNounsSeeder _seeder,
         INomoNounsDescriptor _descriptor
     ) ERC721A('Nomo Nouns', 'NOMO') EIP712('NOMONOUNS', '1') {
@@ -73,7 +68,6 @@ contract NomoNounsToken is ERC721A, ERC721AQueryable, EIP712, Ownable {
         mintingPriceIncreasePerInterval = _mintingPriceIncreasePerInterval;
         withdrawWallet = _withdrawWallet;
         signer = _signer;
-        auctionHouse = _auctionHouse;
         seeder = _seeder;
         descriptor = _descriptor;
     }
