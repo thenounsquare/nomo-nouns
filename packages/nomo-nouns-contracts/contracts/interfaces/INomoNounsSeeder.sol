@@ -32,7 +32,7 @@ interface INomoNounsSeeder {
 
     function generateSeed(
         uint256 nounId,
-        uint256 blockNumber,
+        bytes32 nounBlocknumberHash,
         INomoNounsDescriptor descriptor
     ) external view returns (Seed memory);
 }

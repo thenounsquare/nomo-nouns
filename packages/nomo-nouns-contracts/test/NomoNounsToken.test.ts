@@ -5,6 +5,7 @@ import {
   NomoNounsToken,
 } from "../typechain-types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { time } from "@nomicfoundation/hardhat-network-helpers";
 
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
@@ -19,9 +20,10 @@ describe("NOMO NOUNS Token Testing", async () => {
 
   let nounId = 50;
   let startTime = Math.floor(Date.now() / 1000);
-  let endTime = startTime + 60;
+  let endTime = startTime + 1000;
   let settled = false;
-  let blockNumber = 10_000;
+  let blocknumber =  "10_000"; //as a srting since we are going to hash it
+  let blocknumberHash = ethers.utils.formatBytes32String(blocknumber)
 
   let domain = {
     name: "NOMONOUNS",
@@ -33,7 +35,9 @@ describe("NOMO NOUNS Token Testing", async () => {
   let types = {
     Minter: [
       { name: "nounsId", type: "uint256" },
-      { name: "blockNumber", type: "uint256" },
+      { name: "blocknumberHash", type: "bytes32" },
+      { name: "auctionStartTimestamp", type: "uint256" },
+      { name: "auctionEndTimestamp", type: "uint256" },
     ],
   };
 
@@ -107,85 +111,82 @@ describe("NOMO NOUNS Token Testing", async () => {
   });
 
   describe("Testing Mint function", async () => {
+
+    //GENERAL COMMENTARY ABOUT THE CHANGES:
+    // Since we cannot check the auction house for data, we have to rely on the values used in the signature as source of truth and assume the signer to be honest.
+    // This means that we validate the values being supplied to the function by checking if they are the same as the ones in the signature (and afterwards check for stuff like expiration etc.).
+
+
     it("Mint: should revert with Invalid Signature", async () => {
+
       const signature = await nonOwner._signTypedData(domain, types, {
         nounsId: nounId,
-        blockNumber: blockNumber,
+        blocknumberHash: blocknumberHash,
+        auctionStartTimestamp: startTime,
+        auctionEndTimestamp: endTime,
       });
 
       await expect(
-        nomoNouns.mint(nounId, blockNumber, 1, signature)
+        nomoNouns.mint(nounId, blocknumberHash, startTime, endTime, 1, signature)
       ).to.be.revertedWith("Invalid signature");
     });
 
     it("Mint: should revert when Minting Expired", async () => {
+
+      const shortAuctionStart=  await time.latest()
+
       const signature = await owner._signTypedData(domain, types, {
         nounsId: nounId,
-        blockNumber: blockNumber,
+        blocknumberHash: blocknumberHash,
+        auctionStartTimestamp: shortAuctionStart,
+        auctionEndTimestamp: shortAuctionStart + 10,
       });
 
-      // change endTime
-      await mockAuctionHouse.createAuction(nounId, startTime, 10, settled);
+      await time.increaseTo(shortAuctionStart +11);
 
+      //Valid signature, but minting expired
       await expect(
-        nomoNouns.mint(nounId, blockNumber, 1, signature)
+        nomoNouns.mint(nounId, blocknumberHash, shortAuctionStart, (shortAuctionStart + 10), 1, signature)
       ).to.be.revertedWith("Minting expired");
     });
 
     it("Mint: should revert with invalid NounId", async () => {
       const signature = await owner._signTypedData(domain, types, {
         nounsId: 9999,
-        blockNumber: blockNumber,
+        blocknumberHash: blocknumberHash,
+        auctionStartTimestamp: startTime,
+        auctionEndTimestamp: endTime,
       });
-
-      // change endTime
-      await mockAuctionHouse.createAuction(
-        50,
-        startTime,
-        endTime + 10000,
-        settled
-      );
-
+      
+      //Noun trying to be minted does not correspond to the one in the signature
       await expect(
-        nomoNouns.mint(9999, blockNumber, 1, signature)
-      ).to.be.revertedWith("NounId invalid");
+        nomoNouns.mint(50, blocknumberHash, startTime, endTime, 1, signature)
+      ).to.be.revertedWith("Invalid signature");
     });
 
     it("Mint: should revert with Not enough ETH to pay", async () => {
       const signature = await owner._signTypedData(domain, types, {
         nounsId: nounId,
-        blockNumber: blockNumber,
+        blocknumberHash: blocknumberHash,
+        auctionStartTimestamp: startTime,
+        auctionEndTimestamp: endTime,
       });
 
-      // change endTime
-      await mockAuctionHouse.createAuction(
-        50,
-        startTime,
-        endTime + 10000,
-        settled
-      );
-
       await expect(
-        nomoNouns.mint(nounId, blockNumber, 1, signature, { value: 0 })
+        nomoNouns.mint(nounId, blocknumberHash, startTime, endTime, 1, signature, { value: 0 })
       ).to.be.revertedWith("Not enough ETH to pay");
     });
 
     it("Mint: it should mint a single token", async () => {
       const signature = await owner._signTypedData(domain, types, {
         nounsId: nounId,
-        blockNumber: blockNumber,
+        blocknumberHash: blocknumberHash,
+        auctionStartTimestamp: startTime,
+        auctionEndTimestamp: endTime,
       });
 
-      // change endTime
-      await mockAuctionHouse.createAuction(
-        50,
-        startTime,
-        endTime + 10000,
-        settled
-      );
-
       await expect(
-        nomoNouns.mint(nounId, blockNumber, 1, signature, {
+        nomoNouns.mint(nounId, blocknumberHash, startTime, endTime, 1, signature, {
           value: ethers.utils.parseUnits((20).toString(), "ether"),
         })
       ).not.to.be.reverted;
@@ -196,23 +197,15 @@ describe("NOMO NOUNS Token Testing", async () => {
     });
 
     it("Mint: it should mint 5 tokens", async () => {
-      await mockAuctionHouse.createAuction(nounId, startTime, endTime, settled);
-
       const signature = await owner._signTypedData(domain, types, {
         nounsId: nounId,
-        blockNumber: blockNumber,
+        blocknumberHash: blocknumberHash,
+        auctionStartTimestamp: startTime,
+        auctionEndTimestamp: endTime,
       });
 
-      // change endTime
-      await mockAuctionHouse.createAuction(
-        50,
-        startTime,
-        endTime + 10000,
-        settled
-      );
-
       await expect(
-        nomoNouns.mint(nounId, blockNumber, 5, signature, {
+        nomoNouns.mint(nounId, blocknumberHash, startTime, endTime, 5, signature, {
           value: ethers.utils.parseUnits((20).toString(), "ether"),
         })
       ).not.to.be.reverted;
@@ -223,28 +216,21 @@ describe("NOMO NOUNS Token Testing", async () => {
     });
 
     it("Mint: it should use the auction nounId for all tokens minted", async () => {
-      await mockAuctionHouse.createAuction(nounId, startTime, endTime, settled);
 
       const signature = await owner._signTypedData(domain, types, {
-        nounsId: nounId,
-        blockNumber: blockNumber,
+        nounsId: 50,
+        blocknumberHash: blocknumberHash,
+        auctionStartTimestamp: startTime,
+        auctionEndTimestamp: endTime,
       });
 
-      // change endTime
-      await mockAuctionHouse.createAuction(
-        50,
-        startTime,
-        endTime + 10000,
-        settled
-      );
-
       await expect(
-        nomoNouns.mint(nounId, blockNumber, 500, signature, {
+        nomoNouns.mint(50, blocknumberHash, startTime, endTime, 500, signature, {
           value: ethers.utils.parseUnits((20).toString(), "ether"),
         })
       ).not.to.be.reverted;
       await expect(
-        nomoNouns.mint(nounId, blockNumber, 1, signature, {
+        nomoNouns.mint(50, blocknumberHash, startTime, endTime, 1, signature, {
           value: ethers.utils.parseUnits((20).toString(), "ether"),
         })
       ).not.to.be.reverted;
@@ -259,18 +245,13 @@ describe("NOMO NOUNS Token Testing", async () => {
     it("Withdraw : smart contract should 0 balance", async () => {
       const signature = await owner._signTypedData(domain, types, {
         nounsId: nounId,
-        blockNumber: blockNumber,
+        blocknumberHash: blocknumberHash,
+        auctionStartTimestamp: startTime,
+        auctionEndTimestamp: endTime,
       });
 
-      // change endTime
-      await mockAuctionHouse.createAuction(
-        50,
-        startTime,
-        endTime + 10000,
-        settled
-      );
 
-      await nomoNouns.mint(nounId, blockNumber, 1, signature, {
+      await nomoNouns.mint(nounId, blocknumberHash,  startTime, endTime, 1, signature, {
         value: ethers.utils.parseUnits((20).toString(), "ether"),
       });
 

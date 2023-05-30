@@ -18,9 +18,9 @@ const _abi = [
         type: "uint256",
       },
       {
-        internalType: "uint256",
-        name: "blockNumber",
-        type: "uint256",
+        internalType: "bytes32",
+        name: "nounBlocknumberHash",
+        type: "bytes32",
       },
       {
         internalType: "contract INomoNounsDescriptor",

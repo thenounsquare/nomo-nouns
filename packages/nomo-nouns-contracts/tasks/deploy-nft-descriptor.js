@@ -8,7 +8,7 @@ task("deploy-nft-descriptor", "Deploy Nomo NFT descriptor library").setAction(
     const descriptorContract = await DescriptorContract.deploy({
       gasLimit: 3000000,
       gasPrice: 9000000000,
-      nonce: 0,
+      //nonce: 0,
     });
 
     await descriptorContract.deployed();

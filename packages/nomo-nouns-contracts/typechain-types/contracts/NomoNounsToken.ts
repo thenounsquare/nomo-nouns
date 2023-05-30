@@ -78,7 +78,7 @@ export declare namespace IERC721A {
 
 export interface NomoNounsTokenInterface extends utils.Interface {
   functions: {
-    "_verify(uint256,uint256,bytes)": FunctionFragment;
+    "_verify(uint256,bytes32,uint256,uint256,bytes)": FunctionFragment;
     "approve(address,uint256)": FunctionFragment;
     "auctionHouse()": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
@@ -91,7 +91,7 @@ export interface NomoNounsTokenInterface extends utils.Interface {
     "getMintingPrice(uint256)": FunctionFragment;
     "getNounId(uint256)": FunctionFragment;
     "isApprovedForAll(address,address)": FunctionFragment;
-    "mint(uint256,uint256,uint256,bytes)": FunctionFragment;
+    "mint(uint256,bytes32,uint256,uint256,uint256,bytes)": FunctionFragment;
     "mintingIncreaseInterval()": FunctionFragment;
     "mintingPriceIncreasePerInterval()": FunctionFragment;
     "mintingStartPrice()": FunctionFragment;
@@ -180,6 +180,8 @@ export interface NomoNounsTokenInterface extends utils.Interface {
     functionFragment: "_verify",
     values: [
       PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BytesLike>,
+      PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BytesLike>
     ]
@@ -235,6 +237,8 @@ export interface NomoNounsTokenInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "mint",
     values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BytesLike>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
@@ -619,7 +623,9 @@ export interface NomoNounsToken extends BaseContract {
   functions: {
     _verify(
       nounsId: PromiseOrValue<BigNumberish>,
-      blockNumber: PromiseOrValue<BigNumberish>,
+      blocknumberHash: PromiseOrValue<BytesLike>,
+      auctionStartTimestamp: PromiseOrValue<BigNumberish>,
+      auctionEndTimestamp: PromiseOrValue<BigNumberish>,
       signature: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<[string]>;
@@ -679,7 +685,9 @@ export interface NomoNounsToken extends BaseContract {
 
     mint(
       nounId: PromiseOrValue<BigNumberish>,
-      blockNumber: PromiseOrValue<BigNumberish>,
+      blocknumberHash: PromiseOrValue<BytesLike>,
+      auctionStartTimestamp: PromiseOrValue<BigNumberish>,
+      auctionEndTimestamp: PromiseOrValue<BigNumberish>,
       quantity: PromiseOrValue<BigNumberish>,
       _signature: PromiseOrValue<BytesLike>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
@@ -837,7 +845,9 @@ export interface NomoNounsToken extends BaseContract {
 
   _verify(
     nounsId: PromiseOrValue<BigNumberish>,
-    blockNumber: PromiseOrValue<BigNumberish>,
+    blocknumberHash: PromiseOrValue<BytesLike>,
+    auctionStartTimestamp: PromiseOrValue<BigNumberish>,
+    auctionEndTimestamp: PromiseOrValue<BigNumberish>,
     signature: PromiseOrValue<BytesLike>,
     overrides?: CallOverrides
   ): Promise<string>;
@@ -897,7 +907,9 @@ export interface NomoNounsToken extends BaseContract {
 
   mint(
     nounId: PromiseOrValue<BigNumberish>,
-    blockNumber: PromiseOrValue<BigNumberish>,
+    blocknumberHash: PromiseOrValue<BytesLike>,
+    auctionStartTimestamp: PromiseOrValue<BigNumberish>,
+    auctionEndTimestamp: PromiseOrValue<BigNumberish>,
     quantity: PromiseOrValue<BigNumberish>,
     _signature: PromiseOrValue<BytesLike>,
     overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
@@ -1053,7 +1065,9 @@ export interface NomoNounsToken extends BaseContract {
   callStatic: {
     _verify(
       nounsId: PromiseOrValue<BigNumberish>,
-      blockNumber: PromiseOrValue<BigNumberish>,
+      blocknumberHash: PromiseOrValue<BytesLike>,
+      auctionStartTimestamp: PromiseOrValue<BigNumberish>,
+      auctionEndTimestamp: PromiseOrValue<BigNumberish>,
       signature: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<string>;
@@ -1113,7 +1127,9 @@ export interface NomoNounsToken extends BaseContract {
 
     mint(
       nounId: PromiseOrValue<BigNumberish>,
-      blockNumber: PromiseOrValue<BigNumberish>,
+      blocknumberHash: PromiseOrValue<BytesLike>,
+      auctionStartTimestamp: PromiseOrValue<BigNumberish>,
+      auctionEndTimestamp: PromiseOrValue<BigNumberish>,
       quantity: PromiseOrValue<BigNumberish>,
       _signature: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
@@ -1334,7 +1350,9 @@ export interface NomoNounsToken extends BaseContract {
   estimateGas: {
     _verify(
       nounsId: PromiseOrValue<BigNumberish>,
-      blockNumber: PromiseOrValue<BigNumberish>,
+      blocknumberHash: PromiseOrValue<BytesLike>,
+      auctionStartTimestamp: PromiseOrValue<BigNumberish>,
+      auctionEndTimestamp: PromiseOrValue<BigNumberish>,
       signature: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -1394,7 +1412,9 @@ export interface NomoNounsToken extends BaseContract {
 
     mint(
       nounId: PromiseOrValue<BigNumberish>,
-      blockNumber: PromiseOrValue<BigNumberish>,
+      blocknumberHash: PromiseOrValue<BytesLike>,
+      auctionStartTimestamp: PromiseOrValue<BigNumberish>,
+      auctionEndTimestamp: PromiseOrValue<BigNumberish>,
       quantity: PromiseOrValue<BigNumberish>,
       _signature: PromiseOrValue<BytesLike>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
@@ -1544,7 +1564,9 @@ export interface NomoNounsToken extends BaseContract {
   populateTransaction: {
     _verify(
       nounsId: PromiseOrValue<BigNumberish>,
-      blockNumber: PromiseOrValue<BigNumberish>,
+      blocknumberHash: PromiseOrValue<BytesLike>,
+      auctionStartTimestamp: PromiseOrValue<BigNumberish>,
+      auctionEndTimestamp: PromiseOrValue<BigNumberish>,
       signature: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -1604,7 +1626,9 @@ export interface NomoNounsToken extends BaseContract {
 
     mint(
       nounId: PromiseOrValue<BigNumberish>,
-      blockNumber: PromiseOrValue<BigNumberish>,
+      blocknumberHash: PromiseOrValue<BytesLike>,
+      auctionStartTimestamp: PromiseOrValue<BigNumberish>,
+      auctionEndTimestamp: PromiseOrValue<BigNumberish>,
       quantity: PromiseOrValue<BigNumberish>,
       _signature: PromiseOrValue<BytesLike>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
