@@ -13,6 +13,11 @@ task("deploy-nft-descriptor", "Deploy Nomo NFT descriptor library").setAction(
 
     await descriptorContract.deployed();
 
+    // Uncomment for Etherscan verification
+    //await hre.run("verify:verify", {
+    //  address: descriptorContract.address,
+    //});
+
     console.log(
       "Nomo NFT descriptor deployed to: ",
       descriptorContract.address

@@ -10,6 +10,11 @@ task("deploy-seeder", "Deploy Nomo seeder contract").setAction(
 
     await seederContract.deployed();
 
+    // Uncomment for Etherscan verification
+    //await hre.run("verify:verify", {
+    //  address: seederContract.address,
+    //});
+
     console.log("Seeder contract deployed to: ", seederContract.address);
   }
 );

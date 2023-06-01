@@ -43,6 +43,16 @@ task("deploy-descriptor", "Deploy Nomo descriptor contract")
 
       console.log("Nomo descriptor deployed to: ", descriptorContract.address);
 
+      // Uncomment for Etherscan verification
+      // await hre.run("verify:verify", {
+      //   address: descriptorContract.address,
+      //   constructorArguments: [
+      //     art,
+      //     renderer,
+      //     nomoToken
+      //   ],
+      // });
+
       await descriptorContract.setBackgroundOverride(0, "ff3260", {
         gasPrice: 10000000000,
       });
@@ -51,6 +61,8 @@ task("deploy-descriptor", "Deploy Nomo descriptor contract")
       });
 
       console.log("Background overrides set");
+
+      
 
       console.log(
         "Verification params:\n",
