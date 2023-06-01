@@ -13,6 +13,7 @@ import { useHttpsCallable } from "react-firebase-hooks/functions";
 import { useCallback, useEffect, useRef } from "react";
 import { useProvider, useSigner } from "wagmi";
 import { currentTimestamp } from "./useTimestamp";
+// what are these sdks? NEED TO FIX
 import { getGoerliSdk, getMainnetSdk } from "nomo-nouns-contract-sdks";
 import { useQuery } from "react-query";
 import { useToast } from "@chakra-ui/react";
@@ -141,7 +142,16 @@ export const useVoteFor = () => {
 };
 
 export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
+  // need to modify here to get the right match
   const functions = useFirebaseState((state) => state.functions);
+  // need to change to different signature format
+  // const signature = await owner._signTypedData(domain, types, {
+  //   nounsId: nounId,
+  //   blocknumberHash: blocknumberHash,
+  //   auctionStartTimestamp: startTime,
+  //   auctionEndTimestamp: endTime,
+  // });
+
   const [signForMint] = useHttpsCallable<
     { nounId: number; blockNumber: number },
     string

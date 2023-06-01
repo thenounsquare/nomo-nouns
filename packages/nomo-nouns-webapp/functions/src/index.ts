@@ -7,6 +7,7 @@ import { getMatch, MatchData } from "../../common/match";
 import { Provider } from "@ethersproject/providers";
 import { getGoerliSdk, getMainnetSdk } from "nomo-nouns-contract-sdks";
 import { increment } from "firebase/database";
+import { Bytes, BigNumber } from "ethers";
 
 admin.initializeApp();
 const database = admin.database();
@@ -23,7 +24,9 @@ const domain = {
 const types = {
   Minter: [
     { name: "nounsId", type: "uint256" },
-    { name: "blockNumber", type: "uint256" },
+    { name: "blockHash", type: "bytes32" },
+    { name: "startTime", type: "uint256" },
+    { name: "endTime", type: "uint256" },
   ],
 };
 
@@ -183,13 +186,14 @@ const extendCurrentMatch = async (currentAuction: AuctionData) => {
 };
 
 export const signForMint = functions
-  .runWith({ secrets: ["SIGNER_PRIVATE_KEY"] })
-  .https.onCall(async ({ nounId, blockNumber }) => {
-    const matchData = await database
-      .ref("currentMatch")
-      .get()
-      .then((m) => m.val());
-    const match = getMatch(matchData);
+.runWith({ secrets: ["SIGNER_PRIVATE_KEY"] })
+.https.onCall(async ({ nounId, blockHash, auctionStartTimestamp, auctionEndTimestamp }) => {
+  const matchData = await database
+  .ref("currentMatch")
+  .get()
+  .then((m) => m.val());
+  const match = getMatch(matchData);
+  const mainnetProvider = new ethers.providers.JsonRpcProvider(process.env.MAINNET_RPC_URL!);
 
     if (match.status !== "Selling") {
       throw new functions.https.HttpsError(
@@ -204,21 +208,23 @@ export const signForMint = functions
         block: { number: electedBlockNumber },
       },
     } = match;
-
-    if (nounId !== matchNounId || blockNumber !== electedBlockNumber) {
+    const electedBlockHash = await mainnetProvider.getBlock(electedBlockNumber).then((block) => block.hash);
+    if (nounId !== matchNounId || blockHash !== electedBlockHash) {
       throw new functions.https.HttpsError(
         "invalid-argument",
         "This is not the elected Nomo",
-        { nounId, matchNounId, blockNumber, electedBlockNumber }
+        { nounId, matchNounId, blockHash, electedBlockNumber }
       );
     }
 
     // signing EIP-712
-    const signer = new ethers.Wallet(env.SIGNER_PRIVATE_KEY!);
+    const signer = new ethers.Wallet(env.SIGNER_PRIVATE_KEY!, mainnetProvider);
 
     return signer._signTypedData(domain, types, {
       nounsId: nounId,
-      blockNumber: blockNumber,
+      blockHash: blockHash,
+      startTime: auctionStartTimestamp,
+      endTime: auctionEndTimestamp,
     });
   });
 

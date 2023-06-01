@@ -7,7 +7,7 @@ import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
 
 export const getClient = () => {
   const { chains, provider, webSocketProvider } = configureChains(
-    [import.meta.env.DEV ? chain.goerli : chain.mainnet],
+    [import.meta.env.DEV ? chain.optimismGoerli : chain.optimism],
     [
       alchemyProvider({
         apiKey: import.meta.env.VITE_ALCHEMY_APP_KEY,
