@@ -13,3 +13,8 @@ export declare function getMainnetSdk(defaultSignerOrProvider: Signer | provider
     nomoToken: types.mainnet.NomoToken;
     nomoSeeder: types.mainnet.NomoSeeder;
 };
+export declare type OptimisticGoerliSdk = ReturnType<typeof getOptimisticGoerliSdk>;
+export declare function getOptimisticGoerliSdk(defaultSignerOrProvider: Signer | providers.Provider): {
+    nomoToken: types.optimisticGoerli.NomoToken;
+    nomoSeeder: types.optimisticGoerli.NomoSeeder;
+};

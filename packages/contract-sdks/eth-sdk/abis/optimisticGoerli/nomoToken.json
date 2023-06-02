@@ -23,11 +23,6 @@
       },
       { "internalType": "address", "name": "_signer", "type": "address" },
       {
-        "internalType": "contract INounsAuctionHouseExtra",
-        "name": "_auctionHouse",
-        "type": "address"
-      },
-      {
         "internalType": "contract INomoNounsSeeder",
         "name": "_seeder",
         "type": "address"
@@ -49,6 +44,7 @@
   { "inputs": [], "name": "ApprovalQueryForNonexistentToken", "type": "error" },
   { "inputs": [], "name": "BalanceQueryForZeroAddress", "type": "error" },
   { "inputs": [], "name": "InvalidQueryRange", "type": "error" },
+  { "inputs": [], "name": "InvalidShortString", "type": "error" },
   { "inputs": [], "name": "MintERC2309QuantityExceedsLimit", "type": "error" },
   { "inputs": [], "name": "MintToZeroAddress", "type": "error" },
   { "inputs": [], "name": "MintZeroQuantity", "type": "error" },
@@ -56,6 +52,11 @@
   {
     "inputs": [],
     "name": "OwnershipNotInitializedForExtraData",
+    "type": "error"
+  },
+  {
+    "inputs": [{ "internalType": "string", "name": "str", "type": "string" }],
+    "name": "StringTooLong",
     "type": "error"
   },
   {
@@ -156,6 +157,12 @@
   },
   {
     "anonymous": false,
+    "inputs": [],
+    "name": "EIP712DomainChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
     "inputs": [
       {
         "indexed": true,
@@ -228,7 +235,21 @@
   {
     "inputs": [
       { "internalType": "uint256", "name": "nounsId", "type": "uint256" },
-      { "internalType": "uint256", "name": "blockNumber", "type": "uint256" },
+      {
+        "internalType": "bytes32",
+        "name": "blocknumberHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "auctionStartTimestamp",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "auctionEndTimestamp",
+        "type": "uint256"
+      },
       { "internalType": "bytes", "name": "signature", "type": "bytes" }
     ],
     "name": "_verify",
@@ -244,19 +265,6 @@
     "name": "approve",
     "outputs": [],
     "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "auctionHouse",
-    "outputs": [
-      {
-        "internalType": "contract INounsAuctionHouseExtra",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -293,6 +301,25 @@
         "name": "",
         "type": "address"
       }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "eip712Domain",
+    "outputs": [
+      { "internalType": "bytes1", "name": "fields", "type": "bytes1" },
+      { "internalType": "string", "name": "name", "type": "string" },
+      { "internalType": "string", "name": "version", "type": "string" },
+      { "internalType": "uint256", "name": "chainId", "type": "uint256" },
+      {
+        "internalType": "address",
+        "name": "verifyingContract",
+        "type": "address"
+      },
+      { "internalType": "bytes32", "name": "salt", "type": "bytes32" },
+      { "internalType": "uint256[]", "name": "extensions", "type": "uint256[]" }
     ],
     "stateMutability": "view",
     "type": "function"
@@ -387,7 +414,21 @@
   {
     "inputs": [
       { "internalType": "uint256", "name": "nounId", "type": "uint256" },
-      { "internalType": "uint256", "name": "blockNumber", "type": "uint256" },
+      {
+        "internalType": "bytes32",
+        "name": "blocknumberHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "auctionStartTimestamp",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "auctionEndTimestamp",
+        "type": "uint256"
+      },
       { "internalType": "uint256", "name": "quantity", "type": "uint256" },
       { "internalType": "bytes", "name": "_signature", "type": "bytes" }
     ],
