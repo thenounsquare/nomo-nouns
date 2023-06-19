@@ -10,13 +10,15 @@ import {
   useColorMode,
 } from "@chakra-ui/react";
 import Nomoggles from "../assets/nomoggles.svg";
-import { HiUser, HiUsers, MdMusicNote, MdMusicOff } from "react-icons/all";
+
 import { ConnectKitButton } from "connectkit";
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 import { useAppState } from "../state/appState";
 import { useActiveUserCount } from "../hooks/session";
 import { useEffect, useState } from "react";
 import { useIsMobile } from "../hooks/isMobile";
+import { HiUser, HiUsers } from "react-icons/hi";
+import { MdMusicNote, MdMusicOff } from "react-icons/md";
 
 export const Header = () => {
   const { soundEnabled, toggleSound } = useAppState();

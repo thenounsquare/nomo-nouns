@@ -1,10 +1,12 @@
 import { HStack, Image, Link, Text, Tooltip } from "@chakra-ui/react";
 import volky from "../assets/volky.png";
-import { FaDiscord, FaGithub, FaTwitter, HiUsers } from "react-icons/all";
+
 import { ConnectKitButton } from "connectkit";
 import { useActiveUserCount } from "../hooks/session";
 import { useIsMobile } from "../hooks/isMobile";
 import { EtherscanIcon, OpenSeaIcon } from "./Icons";
+import { FaDiscord, FaGithub, FaTwitter } from "react-icons/fa";
+import { HiUsers } from "react-icons/hi";
 
 export const Footer = () => {
   const activeUserCount = useActiveUserCount();
