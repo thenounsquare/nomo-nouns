@@ -7,6 +7,7 @@ export const MAX_CLICKS_PER_SECOND = 16;
 export type Block = {
   number: number;
   seed: NounSeed;
+  hash: string;
 };
 
 export type VoteCount = {
