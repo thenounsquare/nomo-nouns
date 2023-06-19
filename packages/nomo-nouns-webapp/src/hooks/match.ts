@@ -14,7 +14,11 @@ import { useCallback, useEffect, useRef } from "react";
 import { useProvider, useSigner } from "wagmi";
 import { currentTimestamp } from "./useTimestamp";
 // what are these sdks? NEED TO FIX
-import { getGoerliSdk, getMainnetSdk } from "nomo-nouns-contract-sdks";
+import {
+  getGoerliSdk,
+  getMainnetSdk,
+  getOptimisticGoerliSdk,
+} from "nomo-nouns-contract-sdks";
 import { useQuery } from "react-query";
 import { useToast } from "@chakra-ui/react";
 
@@ -185,16 +189,27 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
     return { canMint: false, mintNomo: undefined };
   }
 
-  const { nomoToken } = import.meta.env.PROD
-    ? getMainnetSdk(signer)
-    : getGoerliSdk(signer);
+  //Should uncomment and add Optimism SDK
+  // const { nomoToken } = import.meta.env.PROD
+  //   ? getMainnetSdk(signer)
+  //   : getOptimisticGoerliSdk(signer);
+  const { nomoToken } = getOptimisticGoerliSdk(signer);
 
   const mintNomo = async (quantity: number) => {
     const mintPrice = getMintPrice(Math.floor(Date.now() / 1000), match);
+    const { hash } = match.electedNomoTally.block;
     return nomoToken
-      .mint(nounId, blockNumber, quantity, mintSignature, {
-        value: mintPrice.mul(quantity),
-      })
+      .mint(
+        nounId,
+        hash,
+        match.startTime,
+        match.endTime,
+        quantity,
+        mintSignature,
+        {
+          value: mintPrice.mul(quantity),
+        }
+      )
       .then((tx: { wait: () => void }) => tx.wait())
       .then(() => {
         toast({
