@@ -144,7 +144,7 @@ export const useVoteFor = () => {
     []
   );
 };
-
+console.log('test');
 export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
   // need to modify here to get the right match
   const functions = useFirebaseState((state) => state.functions);
