@@ -9,12 +9,13 @@ import {
 import { ImageData } from "@nouns/assets";
 import party, { Vector } from "party-js";
 import { FC, useEffect, useMemo, useRef } from "react";
+
 import {
   IoHeart,
   IoHeartDislike,
-  IoHeartDislikeOutline,
   IoHeartOutline,
-} from "react-icons/all";
+  IoHeartDislikeOutline,
+} from "react-icons/io5";
 import { motion } from "framer-motion";
 import { BlockTally, Match } from "../common/match";
 import { EmitterConstructionOptions } from "party-js/lib/particles/emitter";
