@@ -151,15 +151,19 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
   // need to change to different signature format
   // const signature = await owner._signTypedData(domain, types, {
   //   nounsId: nounId,
-  //   blocknumberHash: blocknumberHash,
+  //   blockNumberHash: blockNumberHash,
   //   auctionStartTimestamp: startTime,
   //   auctionEndTimestamp: endTime,
   // });
 
   const [signForMint] = useHttpsCallable<
-    { nounId: number; blockNumber: number },
+    { nounId: number;
+      blockNumberHash: string;
+      auctionStartTimestamp: number;
+      auctionEndTimestamp: number; },
     string
-  >(functions, "signForMint");
+  // >(functions, "signForMint");
+  >(functions, "DEV-TEST-signForMint-2");
   const {
     nounId,
     status,
@@ -167,13 +171,16 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
       block: { number: blockNumber },
     },
   } = match;
+  
   const { data: mintSignature } = useQuery(
     ["mintSignature", nounId, blockNumber],
     () =>
-      signForMint({
-        nounId,
-        blockNumber,
-      }).then((r) => {
+    signForMint({
+      nounId,
+      blockNumberHash: match.electedNomoTally.block.hash,
+      auctionStartTimestamp: match.startTime,
+      auctionEndTimestamp: match.endTime,
+    }).then((r) => {
         if (!r?.data) {
           throw "Couldn't get the mint signed";
         }
