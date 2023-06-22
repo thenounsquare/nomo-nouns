@@ -163,7 +163,7 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
       auctionEndTimestamp: number; },
     string
   // >(functions, "signForMint");
-  >(functions, "DEV-TEST-signForMint-2");
+  >(functions, "signForMint");
   const {
     nounId,
     status,
