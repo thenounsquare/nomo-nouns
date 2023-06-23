@@ -16,12 +16,12 @@ describe("NOMO NOUNS Token Testing", async () => {
   let owner: SignerWithAddress;
   let nonOwner: SignerWithAddress;
 
-  let nounId = 50;
-  let startTime = Math.floor(Date.now() / 1000);
-  let endTime = startTime + 1000;
+  let nounId = 151;
+  let startTime = 1687547165;
+  let endTime = 1687548065;
   let settled = false;
-  let blocknumber =  "10_000"; //as a srting since we are going to hash it
-  let blocknumberHash = ethers.utils.formatBytes32String(blocknumber)
+  let blocknumber = "10000";
+  let blocknumberHash = '0xfabef54918612d0b1d372eb0b5c32f847a131f541512be578feebe9bde379c97';
 
   let domain = {
     name: "NOMONOUNS",
