@@ -59,7 +59,8 @@ export const onAuctionCreated = functions
     );
 
     const { auctionHouse } =
-      env.CHAIN_ID === "1" ? getMainnetSdk(provider) : getGoerliSdk(provider);
+       env.CHAIN_ID === "1" ? getMainnetSdk(provider) : getGoerliSdk(provider);
+     // getMainnetSdk(provider);
 
     const [nounId, , startTime, endTime] = await auctionHouse.auction({
       blockTag: settlementBlockNumber,
@@ -99,6 +100,7 @@ const startNewMatch = async (
   provider: Provider
 ) => {
   const { auctionHouse } =
+  //  getMainnetSdk(provider);
   env.CHAIN_ID === "1" ? getMainnetSdk(provider) : getGoerliSdk(provider);
   // will need to change these conditions here| 420 chain id of optimism goerli | 10 chain id of optimism mainnet
   const { nomoToken, nomoSeeder } = env.CHAIN_ID === "420" ? getOptimisticGoerliSdk(optimismProvider) : getGoerliSdk(provider);
@@ -146,7 +148,7 @@ const startNewMatch = async (
       }))
     )
   );
-
+    console.log("preSettlementBlocks", preSettlementBlocks);
   const fomoBlocks = preSettlementBlocks.filter(
     (block) => block.timestamp > prevAuction.endTime
   );
@@ -195,10 +197,16 @@ export const signForMint = functions
   .get()
   .then((m) => m.val());
   const match = getMatch(matchData);
-  // conditionally check depending on node environment 
+  // conditionally check depending on node environment
+  let provider: Provider ;
+  if (env.CHAIN_ID === '420') {
+    provider = new ethers.providers.JsonRpcProvider(process.env.GOERLI_RPC_URL!);
+  } else  {
+    provider = new ethers.providers.JsonRpcProvider(process.env.MAINNET_RPC_URL!);
+  }
   // const mainnetProvider = new ethers.providers.JsonRpcProvider(process.env.MAINNET_RPC_URL!);
-  const goerliMainnetProvider = new ethers.providers.JsonRpcProvider(process.env.GOERLI_RPC_URL!);
-  
+  // const goerliMainnetProvider = new ethers.providers.JsonRpcProvider(process.env.GOERLI_RPC_URL!);
+
   if (match.status !== "Selling") {
       throw new functions.https.HttpsError(
         "failed-precondition",
@@ -215,7 +223,7 @@ export const signForMint = functions
     } = match;
     // get ethereum mainnet blockhash on production, else get ethereum goerli blockhash for development
     // this line will need to use different providers based on node environment
-     const electedBlockHash = await goerliMainnetProvider.getBlock(electedBlockNumber).then((block) => blocknumberHash = block.hash );
+     const electedBlockHash = await provider.getBlock(electedBlockNumber).then((block) => blocknumberHash = block.hash );
       if (nounId !== matchNounId || blocknumberHash !== electedBlockHash) {
         throw new functions.https.HttpsError(
           "invalid-argument",
