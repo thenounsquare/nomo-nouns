@@ -13,7 +13,6 @@ import { useHttpsCallable } from "react-firebase-hooks/functions";
 import { useCallback, useEffect, useRef } from "react";
 import { useProvider, useSigner } from "wagmi";
 import { currentTimestamp } from "./useTimestamp";
-// what are these sdks? NEED TO FIX
 import {
   getGoerliSdk,
   getMainnetSdk,
@@ -144,25 +143,14 @@ export const useVoteFor = () => {
     []
   );
 };
-console.log("test2");
 export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
-  // need to modify here to get the right match
   const functions = useFirebaseState((state) => state.functions);
-  // need to change to different signature format
-  // const signature = await owner._signTypedData(domain, types, {
-  //   nounsId: nounId,
-  //   blockNumberHash: blockNumberHash,
-  //   auctionStartTimestamp: startTime,
-  //   auctionEndTimestamp: endTime,
-  // });
-
   const [signForMint] = useHttpsCallable<
     { nounId: number;
-      blockNumberHash: string;
+      blocknumberHash: string;
       auctionStartTimestamp: number;
       auctionEndTimestamp: number; },
     string
-  // >(functions, "signForMint");
   >(functions, "signForMint");
   const {
     nounId,
@@ -177,7 +165,7 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
     () =>
     signForMint({
       nounId,
-      blockNumberHash: match.electedNomoTally.block.hash,
+      blocknumberHash: match.electedNomoTally.block.hash,
       auctionStartTimestamp: match.startTime,
       auctionEndTimestamp: match.endTime,
     }).then((r) => {
@@ -205,6 +193,8 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
   const mintNomo = async (quantity: number) => {
     const mintPrice = getMintPrice(Math.floor(Date.now() / 1000), match);
     const { hash } = match.electedNomoTally.block;
+    console.log("hash: ", hash);
+    console.log("mint signature: ", mintSignature);
     return nomoToken
       .mint(
         nounId,

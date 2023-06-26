@@ -5,9 +5,9 @@ import { ethers } from "ethers";
 import { range } from "lodash";
 import { getMatch, MatchData } from "../../common/match";
 import { Provider } from "@ethersproject/providers";
-import { getGoerliSdk, getMainnetSdk } from "nomo-nouns-contract-sdks";
+import { getGoerliSdk, getMainnetSdk, getOptimisticGoerliSdk } from "nomo-nouns-contract-sdks";
 import { increment } from "firebase/database";
-import { Bytes, BigNumber } from "ethers";
+// import { Bytes, BigNumber } from "ethers";
 
 admin.initializeApp();
 const database = admin.database();
@@ -23,10 +23,10 @@ const domain = {
 
 const types = {
   Minter: [
-    { name: "nounsId", type: "uint256" },
-    { name: "blockHash", type: "bytes32" },
-    { name: "startTime", type: "uint256" },
-    { name: "endTime", type: "uint256" },
+      { name: "nounsId", type: "uint256" },
+      { name: "blocknumberHash", type: "bytes32" },
+      { name: "auctionStartTimestamp", type: "uint256" },
+      { name: "auctionEndTimestamp", type: "uint256" },
   ],
 };
 
@@ -41,6 +41,7 @@ type AuctionPayload = {
 };
 
 type AuctionData = Pick<MatchData, "nounId" | "startTime" | "endTime">;
+const optimismProvider = new ethers.providers.AlchemyProvider("optimism-goerli", env.DEVELOPMENT_ALCHEMY_KEY!);
 
 export const onAuctionCreated = functions
   .runWith({ memory: "512MB", secrets: ["JSON_RPC_URL"] })
@@ -52,7 +53,6 @@ export const onAuctionCreated = functions
     } = req.body as AuctionPayload;
 
     const settlementBlockNumber = parseInt(blockNum);
-
     const provider = new ethers.providers.JsonRpcBatchProvider(
       env.JSON_RPC_URL!,
       ethers.providers.getNetwork(env.CHAIN_ID === "1" ? "mainnet" : "goerli")
@@ -98,8 +98,10 @@ const startNewMatch = async (
   settlementBlockNumber: number,
   provider: Provider
 ) => {
-  const { auctionHouse, nomoToken, nomoSeeder } =
-    env.CHAIN_ID === "1" ? getMainnetSdk(provider) : getGoerliSdk(provider);
+  const { auctionHouse } =
+  env.CHAIN_ID === "1" ? getMainnetSdk(provider) : getGoerliSdk(provider);
+  // will need to change these conditions here| 420 chain id of optimism goerli | 10 chain id of optimism mainnet
+  const { nomoToken, nomoSeeder } = env.CHAIN_ID === "420" ? getOptimisticGoerliSdk(optimismProvider) : getGoerliSdk(provider);
   const [prevAuctionNounId, , prevAuctionStartTime, prevAuctionEndTime] =
     await auctionHouse.auction({
       blockTag: settlementBlockNumber - 1,
@@ -135,7 +137,7 @@ const startNewMatch = async (
         })),
         nomoSeeder.generateSeed(
           currentAuction.nounId,
-          blockNumber,
+          provider.getBlock(blockNumber).then((block) => block.hash),
           env.NOMO_DESCRIPTOR_ADDRESS!
         ),
       ]).then(([block, { accessory, background, body, glasses, head }]) => ({
@@ -187,44 +189,57 @@ const extendCurrentMatch = async (currentAuction: AuctionData) => {
 
 export const signForMint = functions
 .runWith({ secrets: ["SIGNER_PRIVATE_KEY"] })
-.https.onCall(async ({ nounId, blockHash, auctionStartTimestamp, auctionEndTimestamp }) => {
+.https.onCall(async ({ nounId, blocknumberHash, auctionStartTimestamp, auctionEndTimestamp }) => {
   const matchData = await database
   .ref("currentMatch")
   .get()
   .then((m) => m.val());
   const match = getMatch(matchData);
-  const mainnetProvider = new ethers.providers.JsonRpcProvider(process.env.MAINNET_RPC_URL!);
-
-    if (match.status !== "Selling") {
+  // conditionally check depending on node environment 
+  // const mainnetProvider = new ethers.providers.JsonRpcProvider(process.env.MAINNET_RPC_URL!);
+  const goerliMainnetProvider = new ethers.providers.JsonRpcProvider(process.env.GOERLI_RPC_URL!);
+  
+  if (match.status !== "Selling") {
       throw new functions.https.HttpsError(
         "failed-precondition",
         "Nomo sale is not open"
       );
     }
-
     const {
       nounId: matchNounId,
       electedNomoTally: {
-        block: { number: electedBlockNumber },
+        block: { number: electedBlockNumber,
+          //  hash: electedBlockHash
+        },
       },
     } = match;
-    const electedBlockHash = await mainnetProvider.getBlock(electedBlockNumber).then((block) => block.hash);
-    if (nounId !== matchNounId || blockHash !== electedBlockHash) {
-      throw new functions.https.HttpsError(
-        "invalid-argument",
-        "This is not the elected Nomo",
-        { nounId, matchNounId, blockHash, electedBlockNumber }
-      );
-    }
+    // get ethereum mainnet blockhash on production, else get ethereum goerli blockhash for development
+    // this line will need to use different providers based on node environment
+     const electedBlockHash = await goerliMainnetProvider.getBlock(electedBlockNumber).then((block) => blocknumberHash = block.hash );
+      if (nounId !== matchNounId || blocknumberHash !== electedBlockHash) {
+        throw new functions.https.HttpsError(
+          "invalid-argument",
+          "This is not the elected Nomo",
+          { nounId, matchNounId, blocknumberHash, electedBlockNumber }
+          );
+        }
 
-    // signing EIP-712
-    const signer = new ethers.Wallet(env.SIGNER_PRIVATE_KEY!, mainnetProvider);
+        // signing EIP-712
+        const signer = new ethers.Wallet(env.SIGNER_PRIVATE_KEY!);
 
+        console.log(signer.address);
+        console.log("electedBlockHash", electedBlockHash);
+      console.log("domain", domain);
+      console.log("types", types);
+      console.log("nounId", nounId);
+      console.log("blocknumberHash", blocknumberHash);
+      console.log("auctionStartTimestamp", auctionStartTimestamp);
+      console.log("auctionEndTimestamp", auctionEndTimestamp);
     return signer._signTypedData(domain, types, {
       nounsId: nounId,
-      blockHash: blockHash,
-      startTime: auctionStartTimestamp,
-      endTime: auctionEndTimestamp,
+      blocknumberHash: blocknumberHash,
+      auctionStartTimestamp: auctionStartTimestamp,
+      auctionEndTimestamp: auctionEndTimestamp,
     });
   });
 
