@@ -60,8 +60,8 @@ export const onAuctionCreated = functions
     } = req.body as AuctionPayload;
     const settlementBlockNumber = parseInt(blockNum);
     const provider = new ethers.providers.JsonRpcBatchProvider(
-      // env.JSON_RPC_URL!,
-      env.MAINNET_RPC_URL!,
+       env.JSON_RPC_URL!,
+      // env.MAINNET_RPC_URL!,
       // Uncomment to use conditional logic for mainnet vs goerli
       // ethers.providers.getNetwork(env.CHAIN_ID === "1" ? "mainnet" : "goerli")
       ethers.providers.getNetwork("mainnet")
@@ -245,16 +245,11 @@ export const signForMint = functions
         .then((m) => m.val());
       const match = getMatch(matchData);
       // conditionally check depending on node environment
-      let provider: Provider;
-      if (env.CHAIN_ID === "420") {
-        provider = new ethers.providers.JsonRpcProvider(
-          process.env.GOERLI_RPC_URL!
-        );
-      } else {
-        provider = new ethers.providers.JsonRpcProvider(
-          process.env.MAINNET_RPC_URL!
-        );
-      }
+      const provider = new ethers.providers.JsonRpcProvider(
+        process.env.JSON_RPC_URL!,
+        ethers.providers.getNetwork("mainnet")
+      );
+
       // const mainnetProvider = new ethers.providers.JsonRpcProvider(process.env.MAINNET_RPC_URL!);
       // const goerliMainnetProvider = new ethers.providers.JsonRpcProvider(process.env.GOERLI_RPC_URL!);
 

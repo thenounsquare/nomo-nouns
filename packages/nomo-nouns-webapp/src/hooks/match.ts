@@ -20,6 +20,7 @@ import {
 } from "nomo-nouns-contract-sdks";
 import { useQuery } from "react-query";
 import { useToast } from "@chakra-ui/react";
+import { getClient } from "../config/wagmi";
 
 export const match = () => {
   const database = useFirebaseState((state) => state.db);
@@ -241,8 +242,8 @@ export const useDisqualifiedNotification = (match: ActiveMatch) => {
   );
 
   const toast = useToast();
-  const provider = useProvider();
-
+  const provider = getClient().provider;
+    console.log(provider);
   useEffect(() => {
     Object.keys(match.disqualifiedWallets ?? {}).forEach((wallet) => {
       if (
