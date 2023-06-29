@@ -45,10 +45,6 @@ type AuctionPayload = {
 };
 
 type AuctionData = Pick<MatchData, "nounId" | "startTime" | "endTime">;
-const optimismProvider = new ethers.providers.AlchemyProvider(
-  "optimism-goerli",
-  env.VITE_ALCHEMY_APP_KEY!
-);
 
 export const onAuctionCreated = functions
   .runWith({ memory: "512MB", secrets: ["JSON_RPC_URL"] })
@@ -59,6 +55,10 @@ export const onAuctionCreated = functions
       },
     } = req.body as AuctionPayload;
     const settlementBlockNumber = parseInt(blockNum);
+    const optimismProvider = new ethers.providers.AlchemyProvider(
+      "optimism-goerli",
+      env.OPTIMISM_GOERLI_RPC_URL!
+    );
     const provider = new ethers.providers.JsonRpcBatchProvider(
        env.JSON_RPC_URL!,
       // env.MAINNET_RPC_URL!,
@@ -133,6 +133,10 @@ const startNewMatch = async (
   const mainnetProvider = new ethers.providers.JsonRpcBatchProvider(
     env.MAINNET_RPC_URL!,
     ethers.providers.getNetwork("mainnet")
+  );
+  const optimismProvider = new ethers.providers.AlchemyProvider(
+    "optimism-goerli",
+    env.OPTIMISM_GOERLI_RPC_URL!
   );
   const { auctionHouse } = getMainnetSdk(mainnetProvider);
   // env.CHAIN_ID === "1" ? getMainnetSdk(provider) : getGoerliSdk(provider);

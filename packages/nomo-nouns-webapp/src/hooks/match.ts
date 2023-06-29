@@ -243,7 +243,6 @@ export const useDisqualifiedNotification = (match: ActiveMatch) => {
 
   const toast = useToast();
   const provider = getClient().provider;
-    console.log(provider);
   useEffect(() => {
     Object.keys(match.disqualifiedWallets ?? {}).forEach((wallet) => {
       if (
