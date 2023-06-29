@@ -60,7 +60,8 @@ export const onAuctionCreated = functions
     } = req.body as AuctionPayload;
     const settlementBlockNumber = parseInt(blockNum);
     const provider = new ethers.providers.JsonRpcBatchProvider(
-      env.JSON_RPC_URL!,
+      // env.JSON_RPC_URL!,
+      env.MAINNET_RPC_URL!,
       // Uncomment to use conditional logic for mainnet vs goerli
       // ethers.providers.getNetwork(env.CHAIN_ID === "1" ? "mainnet" : "goerli")
       ethers.providers.getNetwork("mainnet")
@@ -73,40 +74,54 @@ export const onAuctionCreated = functions
     console.log(
       "settlementBlockNumber",
       settlementBlockNumber,
-      "condition",
-      env.CHAIN_ID === "1"
+      "auctionHouse.address",
+      auctionHouse.address
     );
 
-    const [nounId, , startTime, endTime] = await auctionHouse.auction({
-      blockTag: settlementBlockNumber,
-    });
-    console.log("nounId, startTime, endTime", nounId, startTime, endTime);
-    const currentAuction = {
-      nounId: nounId.toNumber(),
-      startTime: startTime.toNumber(),
-      endTime: endTime.toNumber(),
-    };
+    try {
+      const [nounId, , startTime, endTime] = await auctionHouse.auction({
+        blockTag: settlementBlockNumber,
+      });
+      console.log("nounId, startTime, endTime", nounId, startTime, endTime);
+      const currentAuction = {
+        nounId: nounId.toNumber(),
+        startTime: startTime.toNumber(),
+        endTime: endTime.toNumber(),
+      };
 
-    const currentMatch = await database
-      .ref("currentMatch")
-      .get()
-      .then((s) => s.val());
+      const currentMatch = await database
+        .ref("currentMatch")
+        .get()
+        .then((s) => s.val());
 
-    if (
-      currentMatch === null ||
-      currentAuction.nounId !== currentMatch.nounId
-    ) {
-      await startNewMatch(
-        currentMatch,
-        currentAuction,
-        settlementBlockNumber,
-        provider
-      );
-    } else {
-      await extendCurrentMatch(currentAuction);
+      console.log("After Current Match");
+
+      if (
+        currentMatch === null ||
+        currentAuction.nounId !== currentMatch.nounId
+      ) {
+        await startNewMatch(
+          currentMatch,
+          currentAuction,
+          settlementBlockNumber,
+          optimismProvider
+        );
+
+        console.log(
+          "settlementBlockNumber",
+          settlementBlockNumber,
+          "currentAuction",
+          currentAuction.nounId
+        );
+      } else {
+        await extendCurrentMatch(currentAuction);
+      }
+
+      resp.sendStatus(200);
+    } catch (error) {
+      console.error("onAuctionCreatedError", error);
+      resp.sendStatus(500);
     }
-
-    resp.sendStatus(200);
   });
 
 const startNewMatch = async (
@@ -120,9 +135,9 @@ const startNewMatch = async (
     env.CHAIN_ID === "1" ? getMainnetSdk(provider) : getGoerliSdk(provider);
   // will need to change these conditions here| 420 chain id of optimism goerli | 10 chain id of optimism mainnet
   const { nomoToken, nomoSeeder } =
-    env.CHAIN_ID === "420" ?
-      getOptimisticGoerliSdk(optimismProvider) :
-      getGoerliSdk(provider);
+    env.CHAIN_ID === "420"
+      ? getOptimisticGoerliSdk(optimismProvider)
+      : getGoerliSdk(provider);
   const [prevAuctionNounId, , prevAuctionStartTime, prevAuctionEndTime] =
     await auctionHouse.auction({
       blockTag: settlementBlockNumber - 1,
