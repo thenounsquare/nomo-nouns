@@ -6,7 +6,7 @@ import { range } from "lodash";
 import { getMatch, MatchData } from "../../common/match";
 import { Provider } from "@ethersproject/providers";
 import {
-  getGoerliSdk,
+  // getGoerliSdk,
   getMainnetSdk,
   getOptimisticGoerliSdk,
 } from "nomo-nouns-contract-sdks";
@@ -130,14 +130,21 @@ const startNewMatch = async (
   settlementBlockNumber: number,
   provider: Provider
 ) => {
-  const { auctionHouse } =
-    //  getMainnetSdk(provider);
-    env.CHAIN_ID === "1" ? getMainnetSdk(provider) : getGoerliSdk(provider);
+  const mainnetProvider = new ethers.providers.JsonRpcBatchProvider(
+    env.MAINNET_RPC_URL!,
+    ethers.providers.getNetwork("mainnet")
+  );
+  const { auctionHouse } = getMainnetSdk(mainnetProvider);
+  // env.CHAIN_ID === "1" ? getMainnetSdk(provider) : getGoerliSdk(provider);
   // will need to change these conditions here| 420 chain id of optimism goerli | 10 chain id of optimism mainnet
-  const { nomoToken, nomoSeeder } =
-    env.CHAIN_ID === "420"
-      ? getOptimisticGoerliSdk(optimismProvider)
-      : getGoerliSdk(provider);
+  const { nomoToken, nomoSeeder } = getOptimisticGoerliSdk(optimismProvider);
+  // env.CHAIN_ID === "420"
+  //   ? getOptimisticGoerliSdk(optimismProvider)
+  //   : getGoerliSdk(provider);
+
+  console.log("startNewMatchnomoToken", nomoToken.address);
+  console.log("startNewMatchauctionHouse", auctionHouse.address);
+
   const [prevAuctionNounId, , prevAuctionStartTime, prevAuctionEndTime] =
     await auctionHouse.auction({
       blockTag: settlementBlockNumber - 1,
