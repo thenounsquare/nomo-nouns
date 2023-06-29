@@ -47,7 +47,7 @@ type AuctionPayload = {
 type AuctionData = Pick<MatchData, "nounId" | "startTime" | "endTime">;
 
 export const onAuctionCreated = functions
-  .runWith({ memory: "512MB", secrets: ["JSON_RPC_URL"] })
+  .runWith({ memory: "512MB", secrets: ["JSON_RPC_URL", "OPTIMISM_GOERLI_RPC_URL"] })
   .https.onRequest(async (req, resp) => {
     const {
       event: {
@@ -70,7 +70,6 @@ export const onAuctionCreated = functions
     // const { auctionHouse } =
     //   env.CHAIN_ID === "1" ? getMainnetSdk(provider) : getGoerliSdk(provider);
     const { auctionHouse } = getMainnetSdk(provider);
-    // getMainnetSdk(provider);
     console.log(
       "settlementBlockNumber",
       settlementBlockNumber,
@@ -79,7 +78,7 @@ export const onAuctionCreated = functions
     );
 
     try {
-      const [nounId, , startTime, endTime] = await auctionHouse.auction({
+      const [nounId, startTime, endTime] = await auctionHouse.auction({
         blockTag: settlementBlockNumber,
       });
       console.log("nounId, startTime, endTime", nounId, startTime, endTime);
@@ -177,14 +176,14 @@ const startNewMatch = async (
   const preSettlementBlocks = await Promise.all(
     candidateBlockNumbers.map((blockNumber) =>
       Promise.all([
-        provider.getBlock(blockNumber).then((block) => ({
+        mainnetProvider.getBlock(blockNumber).then((block) => ({
           number: blockNumber,
           hash: block.hash,
           timestamp: block.timestamp,
         })),
         nomoSeeder.generateSeed(
           currentAuction.nounId,
-          provider.getBlock(blockNumber).then((block) => block.hash),
+          mainnetProvider.getBlock(blockNumber).then((block) => block.hash),
           env.NOMO_DESCRIPTOR_ADDRESS!
         ),
       ]).then(([block, { accessory, background, body, glasses, head }]) => ({
