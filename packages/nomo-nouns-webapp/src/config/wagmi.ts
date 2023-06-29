@@ -10,7 +10,7 @@ export const getClient = () => {
     [import.meta.env.DEV ? chain.optimismGoerli : chain.optimism],
     [
       alchemyProvider({
-        apiKey: process.env.DEVELOPMENT_ALCHEMY_KEY,
+        apiKey: process.env.VITE_ALCHEMY_APP_KEY,
         priority: 0,
       }),
     ],

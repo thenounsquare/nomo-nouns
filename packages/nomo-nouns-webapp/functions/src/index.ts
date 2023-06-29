@@ -47,7 +47,7 @@ type AuctionPayload = {
 type AuctionData = Pick<MatchData, "nounId" | "startTime" | "endTime">;
 const optimismProvider = new ethers.providers.AlchemyProvider(
   "optimism-goerli",
-  env.DEVELOPMENT_ALCHEMY_KEY!
+  env.VITE_ALCHEMY_APP_KEY!
 );
 
 export const onAuctionCreated = functions
