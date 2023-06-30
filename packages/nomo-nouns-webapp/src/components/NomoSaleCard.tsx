@@ -67,8 +67,6 @@ export const NomoSaleCard: FC<NomoSaleCardProps> = ({ match, ...props }) => {
   const totalCostString = formatEther(totalCost);
   const hasFundsToMint = !balance || balance.value.gte(totalCost);
   const saleOver = match.status === "Finished";
-  // log to see the hash of the elected nomo tally on the front end
-  console.log("this is the elected nomo tally on the sale card", match.electedNomoTally.block.hash)
   // console.log({
   //       isDisconnected ,
   //     hasFundsToMint ,

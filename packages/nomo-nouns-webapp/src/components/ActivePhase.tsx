@@ -116,11 +116,7 @@ export const CandidatesGrid: FC<CandidatesGridProps> = ({
       ? useBreakpointValue(["96px", "160px"])
       : useBreakpointValue(["160px", "320px"]);
       const eliminatedCandidatesWidth = useBreakpointValue(["64px", "96px"]);
-      // log to see the block number and hash for each tally on the front end
-      activeCandidates.forEach( candidate => { 
-        console.log("this is the index for each tally", candidate.block.number)
-        console.log("this is the block hash for each tally", candidate.block.hash)
-      });
+
   return (
     <LayoutGroup>
       <VStack

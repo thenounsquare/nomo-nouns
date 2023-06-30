@@ -65,8 +65,10 @@ export const useStartNextMatch = () => {
         mintingIncreaseInterval,
         mintingPriceIncreasePerInterval,
       } = currentMatch;
+      candidateBlocks.forEach ( candidate => {
+        console.log(`this is one of the candidates on the front-end candidate hash: ${candidate.hash}, candidate number: ${candidate.number}, candidate timestamp: ${candidate.timestamp}`)
+      })
       const now = currentTimestamp();
-
       push(pastMatchesRef, currentMatch);
       set(currentMatchRef, {
         nounId: currentMatch.nounId + 1,
@@ -157,16 +159,16 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
     nounId,
     status,
     electedNomoTally: {
-      block: { number: blockNumber },
+      block: { hash: blockNumberHash },
     },
   } = match;
   
   const { data: mintSignature } = useQuery(
-    ["mintSignature", nounId, blockNumber],
+    ["mintSignature", nounId, blockNumberHash],
     () =>
     signForMint({
       nounId,
-      blocknumberHash: match.electedNomoTally.block.hash,
+      blocknumberHash: blockNumberHash,
       auctionStartTimestamp: match.startTime,
       auctionEndTimestamp: match.endTime,
     }).then((r) => {
@@ -194,8 +196,8 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
   const mintNomo = async (quantity: number) => {
     const mintPrice = getMintPrice(Math.floor(Date.now() / 1000), match);
     const { hash } = match.electedNomoTally.block;
-    console.log("hash: ", hash);
-    console.log("mint signature: ", mintSignature);
+    console.log(`this is the elected nomo on the front-end \n \n nounId: ${nounId},\n blockNumberHash: ${blockNumberHash},\n auctionStartTimestamp: ${match.startTime}, \n auctionEndTimestamp: ${match.endTime},\n mintSignature: ${mintSignature}`)
+
     return nomoToken
       .mint(
         nounId,
