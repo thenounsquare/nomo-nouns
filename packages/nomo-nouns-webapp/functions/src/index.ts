@@ -172,7 +172,6 @@ const startNewMatch = async (
       Math.max(maxBlocksBetweenAuctions, MIN_AMOUNT_CANDIDATES),
     settlementBlockNumber - 1
   );
-
   const preSettlementBlocks = await Promise.all(
     candidateBlockNumbers.map((blockNumber) =>
       Promise.all([
@@ -289,6 +288,7 @@ export const signForMint = functions
 
       console.log(signer.address);
       console.log("electedBlockHash", electedBlockHash);
+      console.log("electedBlockNumber", electedBlockNumber);
       console.log("domain", domain);
       console.log("types", types);
       console.log("nounId", nounId);
