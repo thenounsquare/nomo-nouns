@@ -66,10 +66,11 @@ export const useStartNextMatch = () => {
         mintingPriceIncreasePerInterval,
       } = currentMatch;
       candidateBlocks.forEach ( candidate => {
-        console.log(`this is one of the candidates on the front-end candidate hash: ${candidate.hash}, candidate number: ${candidate.number}, candidate timestamp: ${candidate.timestamp}`)
+        console.log(`this is one of the candidates on the front-end when calling start new match candidate hash: ${candidate.hash}, candidate number: ${candidate.number}, candidate seed: ${candidate.seed}`)
       })
       const now = currentTimestamp();
       push(pastMatchesRef, currentMatch);
+      // here it increases the nounId by 1
       set(currentMatchRef, {
         nounId: currentMatch.nounId + 1,
         candidateBlocks,

@@ -172,6 +172,12 @@ const startNewMatch = async (
       Math.max(maxBlocksBetweenAuctions, MIN_AMOUNT_CANDIDATES),
     settlementBlockNumber - 1
   );
+    candidateBlockNumbers.forEach( (candidate) => {
+      mainnetProvider.getBlock(candidate).then( (block) =>
+        console.log(`these are calculated on start new match and are used to generate the seeds: \n this is the auction Id ${currentAuction.nounId} \nthis is the block hash: \n ${block.hash} \n this is the block number:  \n${block.number}`)
+        );
+});
+
   const preSettlementBlocks = await Promise.all(
     candidateBlockNumbers.map((blockNumber) =>
       Promise.all([
