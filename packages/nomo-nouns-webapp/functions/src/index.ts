@@ -76,7 +76,7 @@ export const onAuctionCreated = functions
       "auctionHouse.address",
       auctionHouse.address
     );
-
+    // attempt to grab and save currentMatch variable
     try {
       const [nounId, startTime, endTime] = await auctionHouse.auction({
         blockTag: settlementBlockNumber,
@@ -88,7 +88,7 @@ export const onAuctionCreated = functions
         endTime: endTime.toNumber(),
       };
 
-      const currentMatch = await database
+     const currentMatch = await database
         .ref("currentMatch")
         .get()
         .then((s) => s.val());
@@ -172,6 +172,9 @@ const startNewMatch = async (
       Math.max(maxBlocksBetweenAuctions, MIN_AMOUNT_CANDIDATES),
     settlementBlockNumber - 1
   );
+  // testing to set seed nounId to current match nounId not current auction nounId
+    const seedNounId = prevMatch?.nounId ?? currentAuction.nounId; 
+
   const preSettlementBlocks = await Promise.all(
     candidateBlockNumbers.map((blockNumber) =>
       Promise.all([
@@ -181,7 +184,7 @@ const startNewMatch = async (
           timestamp: block.timestamp,
         })),
         nomoSeeder.generateSeed(
-          currentAuction.nounId,
+          seedNounId,
           mainnetProvider.getBlock(blockNumber).then((block) => block.hash),
           env.NOMO_DESCRIPTOR_ADDRESS!
         ),
