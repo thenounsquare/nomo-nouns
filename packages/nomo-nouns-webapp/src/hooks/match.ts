@@ -66,7 +66,7 @@ export const useStartNextMatch = () => {
         mintingPriceIncreasePerInterval,
       } = currentMatch;
       candidateBlocks.forEach ( candidate => {
-        console.log(`this is one of the candidates on the front-end when calling start new match candidate hash: ${candidate.hash}, candidate number: ${candidate.number}, candidate seed: ${candidate.seed}`)
+        console.log(`this is one of the candidates on the front-end when calling start new match: \n currentMatch: ${currentMatch.nounId +1} \n current hash  ${candidate.hash}, \ncandidate number: ${candidate.number}, \n candidate seed: ${candidate.seed}`)
       })
       const now = currentTimestamp();
       push(pastMatchesRef, currentMatch);
