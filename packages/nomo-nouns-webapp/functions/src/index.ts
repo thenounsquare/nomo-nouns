@@ -173,8 +173,8 @@ const startNewMatch = async (
     settlementBlockNumber - 1
   );
   // testing to set seed nounId to current match nounId not current auction nounId
-    const seedNounId = prevMatch?.nounId ?? currentAuction.nounId; 
-
+    const seedNounId = prevMatch?.nounId ?? currentAuction.nounId;
+    console.log(`for this nounId ${currentAuction.nounId}, this is the prevMatch nounId ${prevMatch?.nounId} and this is the seed nounId being used ${seedNounId}`);
   const preSettlementBlocks = await Promise.all(
     candidateBlockNumbers.map((blockNumber) =>
       Promise.all([
@@ -194,7 +194,7 @@ const startNewMatch = async (
       }))
     )
   );
-  console.log(`for this nounId ${currentAuction.nounId}, these are the preSettlementBlocks, ${preSettlementBlocks}`);
+  // console.log(`for this nounId ${currentAuction.nounId}, these are the preSettlementBlocks, ${preSettlementBlocks}`);
   const fomoBlocks = preSettlementBlocks.filter(
     (block) => block.timestamp > prevAuction.endTime
   );
