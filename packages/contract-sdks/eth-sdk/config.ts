@@ -15,6 +15,10 @@ export default defineConfig({
     optimisticGoerli: {
       nomoToken:"0xa9D1b7F5422c225b5E94c56C5354838ee0FF5d98",
       nomoSeeder: "0x95D62E2Ac64181599bcb2A0cA148FF7d2d94130E",
+    },
+    optimism:{
+      nomoToken:"0x1464eBBf9ecd642d42Db8e8827919fdd4A786987",
+      nomoSeeder: "0xD5CA8ad163a342Bb769C5157934C9F1cC2b0EFC6",
     }
   },
   outputPath: "./",
