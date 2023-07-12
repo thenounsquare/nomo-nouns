@@ -38,7 +38,7 @@ const config = {
         },
         optimisticGoerli: {
             url: `https://opt-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
-              accounts: process.env.MNEMONIC
+            accounts: process.env.MNEMONIC
                 ? { mnemonic: process.env.MNEMONIC }
                 : [process.env.WALLET_PRIVATE_KEY!].filter(Boolean),
         },

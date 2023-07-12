@@ -29,7 +29,7 @@ const _abi = [
     stateMutability: "view",
     type: "function",
   },
-];
+] as const;
 
 export class INomoToNounMapper__factory {
   static readonly abi = _abi;

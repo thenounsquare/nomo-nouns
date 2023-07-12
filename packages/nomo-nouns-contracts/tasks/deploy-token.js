@@ -34,7 +34,7 @@ task("deploy-token", "Deploy Nomo token contract")
   .addOptionalParam(
     "seeder",
     "The NomoNounsSeeder contract address",
-    "0xb5fCF67C2ec74248692AfCCFDd5d22De49187CAc",
+    "0xD5CA8ad163a342Bb769C5157934C9F1cC2b0EFC6",
     types.string
   )
   .addOptionalParam(
