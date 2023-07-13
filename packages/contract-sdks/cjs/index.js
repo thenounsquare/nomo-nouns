@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOptimisticGoerliSdk = exports.getMainnetSdk = exports.getGoerliSdk = exports.getContract = void 0;
+exports.getOptimismSdk = exports.getOptimisticGoerliSdk = exports.getMainnetSdk = exports.getGoerliSdk = exports.getContract = void 0;
 const ethers_1 = require("ethers");
 const auctionHouse_json_1 = __importDefault(require("../eth-sdk/abis/goerli/auctionHouse.json"));
 const nomoToken_json_1 = __importDefault(require("../eth-sdk/abis/goerli/nomoToken.json"));
@@ -13,6 +13,8 @@ const nomoToken_json_2 = __importDefault(require("../eth-sdk/abis/mainnet/nomoTo
 const nomoSeeder_json_2 = __importDefault(require("../eth-sdk/abis/mainnet/nomoSeeder.json"));
 const nomoToken_json_3 = __importDefault(require("../eth-sdk/abis/optimisticGoerli/nomoToken.json"));
 const nomoSeeder_json_3 = __importDefault(require("../eth-sdk/abis/optimisticGoerli/nomoSeeder.json"));
+const nomoToken_json_4 = __importDefault(require("../eth-sdk/abis/optimism/nomoToken.json"));
+const nomoSeeder_json_4 = __importDefault(require("../eth-sdk/abis/optimism/nomoSeeder.json"));
 function getContract(address, abi, defaultSignerOrProvider) {
     return new ethers_1.Contract(address, abi, defaultSignerOrProvider);
 }
@@ -40,3 +42,10 @@ function getOptimisticGoerliSdk(defaultSignerOrProvider) {
     };
 }
 exports.getOptimisticGoerliSdk = getOptimisticGoerliSdk;
+function getOptimismSdk(defaultSignerOrProvider) {
+    return {
+        "nomoToken": getContract('0x1464eBBf9ecd642d42Db8e8827919fdd4A786987', nomoToken_json_4.default, defaultSignerOrProvider),
+        "nomoSeeder": getContract('0xD5CA8ad163a342Bb769C5157934C9F1cC2b0EFC6', nomoSeeder_json_4.default, defaultSignerOrProvider),
+    };
+}
+exports.getOptimismSdk = getOptimismSdk;
