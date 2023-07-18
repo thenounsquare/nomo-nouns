@@ -19,7 +19,7 @@
     "@nouns/assets": "^0.4.0",
     "@nouns/sdk": "^0.2.0",
     "@vercel/analytics": "^0.1.8",
-    "connectkit": "^1.0.0",
+    "connectkit": "1.0.0",
     "ethers": "^5.7.1",
     "firebase": "^9.10.0",
     "framer-motion": "^6",
