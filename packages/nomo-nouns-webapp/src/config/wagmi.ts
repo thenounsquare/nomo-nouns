@@ -1,7 +1,6 @@
 import { chain, configureChains, createClient } from "wagmi";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { InjectedConnector } from "wagmi/connectors/injected";
-import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
 
@@ -27,12 +26,6 @@ export const getClient = () => {
       new CoinbaseWalletConnector({
         chains,
         options: { appName: "Nomo Nouns", headlessMode: true },
-      }),
-      new WalletConnectConnector({
-        chains,
-        options: {
-          qrcode: false,
-        },
       }),
     ],
   });
