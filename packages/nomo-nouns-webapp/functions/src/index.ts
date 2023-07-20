@@ -140,8 +140,6 @@ const startNewMatch = async (
     env.OPTIMISM_GOERLI_RPC_URL!
   );
   const { auctionHouse } = getMainnetSdk(mainnetProvider);
-  // env.CHAIN_ID === "1" ? getMainnetSdk(provider) : getGoerliSdk(provider);
-  // will need to change these conditions here| 420 chain id of optimism goerli | 10 chain id of optimism mainnet
 
   const { nomoToken, nomoSeeder } =
     env.CHAIN_ID === "420"
