@@ -15,7 +15,7 @@ import { useProvider, useSigner } from "wagmi";
 import { currentTimestamp } from "./useTimestamp";
 import {
   getGoerliSdk,
-  getMainnetSdk,
+  getOptimismSdk,
   getOptimisticGoerliSdk,
 } from "nomo-nouns-contract-sdks";
 import { useQuery } from "react-query";
@@ -65,9 +65,15 @@ export const useStartNextMatch = () => {
         mintingIncreaseInterval,
         mintingPriceIncreasePerInterval,
       } = currentMatch;
-      candidateBlocks.forEach ( candidate => {
-        console.log(`this is one of the candidates on the front-end when calling start new match: \n currentMatch: ${currentMatch.nounId +1} \n current hash  ${candidate.hash}, \ncandidate number: ${candidate.number}, \n candidate seed: ${candidate.seed}`)
-      })
+      candidateBlocks.forEach((candidate) => {
+        console.log(
+          `this is one of the candidates on the front-end when calling start new match: \n currentMatch: ${
+            currentMatch.nounId + 1
+          } \n current hash  ${candidate.hash}, \ncandidate number: ${
+            candidate.number
+          }, \n candidate seed: ${candidate.seed}`
+        );
+      });
       const now = currentTimestamp();
       push(pastMatchesRef, currentMatch);
       // here it increases the nounId by 1
@@ -150,10 +156,12 @@ export const useVoteFor = () => {
 export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
   const functions = useFirebaseState((state) => state.functions);
   const [signForMint] = useHttpsCallable<
-    { nounId: number;
+    {
+      nounId: number;
       blocknumberHash: string;
       auctionStartTimestamp: number;
-      auctionEndTimestamp: number; },
+      auctionEndTimestamp: number;
+    },
     string
   >(functions, "signForMint");
   const {
@@ -163,16 +171,16 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
       block: { hash: blockNumberHash },
     },
   } = match;
-  
+
   const { data: mintSignature } = useQuery(
     ["mintSignature", nounId, blockNumberHash],
     () =>
-    signForMint({
-      nounId,
-      blocknumberHash: blockNumberHash,
-      auctionStartTimestamp: match.startTime,
-      auctionEndTimestamp: match.endTime,
-    }).then((r) => {
+      signForMint({
+        nounId,
+        blocknumberHash: blockNumberHash,
+        auctionStartTimestamp: match.startTime,
+        auctionEndTimestamp: match.endTime,
+      }).then((r) => {
         if (!r?.data) {
           throw "Couldn't get the mint signed";
         }
@@ -189,15 +197,16 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
   }
 
   //Should uncomment and add Optimism SDK
-  // const { nomoToken } = import.meta.env.PROD
-  //   ? getMainnetSdk(signer)
-  //   : getOptimisticGoerliSdk(signer);
-  const { nomoToken } = getOptimisticGoerliSdk(signer);
+  const { nomoToken } = import.meta.env.PROD
+    ? getOptimismSdk(signer)
+    : getOptimisticGoerliSdk(signer);
 
   const mintNomo = async (quantity: number) => {
     const mintPrice = getMintPrice(Math.floor(Date.now() / 1000), match);
     const { hash } = match.electedNomoTally.block;
-    console.log(`this is the elected nomo on the front-end \n \n nounId: ${nounId},\n blockNumberHash: ${blockNumberHash},\n auctionStartTimestamp: ${match.startTime}, \n auctionEndTimestamp: ${match.endTime},\n mintSignature: ${mintSignature}`)
+    console.log(
+      `this is the elected nomo on the front-end \n \n nounId: ${nounId},\n blockNumberHash: ${blockNumberHash},\n auctionStartTimestamp: ${match.startTime}, \n auctionEndTimestamp: ${match.endTime},\n mintSignature: ${mintSignature}`
+    );
 
     return nomoToken
       .mint(
