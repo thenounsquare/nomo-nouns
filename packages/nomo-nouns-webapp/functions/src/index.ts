@@ -2,12 +2,12 @@ import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { env } from "node:process";
 import { ethers } from "ethers";
-import { range } from "lodash";
+import { get, range } from "lodash";
 import { getMatch, MatchData } from "../../common/match";
 import { Provider } from "@ethersproject/providers";
 import {
-  // getGoerliSdk,
   getMainnetSdk,
+  getOptimismSdk,
   getOptimisticGoerliSdk,
 } from "nomo-nouns-contract-sdks";
 import { increment } from "firebase/database";
@@ -47,7 +47,13 @@ type AuctionPayload = {
 type AuctionData = Pick<MatchData, "nounId" | "startTime" | "endTime">;
 
 export const onAuctionCreated = functions
-  .runWith({ memory: "512MB", secrets: ["JSON_RPC_URL", "OPTIMISM_GOERLI_RPC_URL"] })
+  .runWith({
+    memory: "512MB",
+    secrets: [
+      "JSON_RPC_URL",
+      env.CHAIN_ID === "420" ? "OPTIMISM_GOERLI_RPC_URL" : "OPTIMISM_RPC_URL",
+    ],
+  })
   .https.onRequest(async (req, resp) => {
     const {
       event: {
@@ -56,19 +62,15 @@ export const onAuctionCreated = functions
     } = req.body as AuctionPayload;
     const settlementBlockNumber = parseInt(blockNum);
     const optimismProvider = new ethers.providers.AlchemyProvider(
-      "optimism-goerli",
-      env.OPTIMISM_GOERLI_RPC_URL!
+      env.CHAIN_ID === "420" ? "optimism-goerli" : "optimism",
+      env.CHAIN_ID === "420"
+        ? env.OPTIMISM_GOERLI_RPC_URL!
+        : env.OPTIMISM_RPC_URL!
     );
     const provider = new ethers.providers.JsonRpcBatchProvider(
-       env.JSON_RPC_URL!,
-      // env.MAINNET_RPC_URL!,
-      // Uncomment to use conditional logic for mainnet vs goerli
-      // ethers.providers.getNetwork(env.CHAIN_ID === "1" ? "mainnet" : "goerli")
+      env.JSON_RPC_URL!,
       ethers.providers.getNetwork("mainnet")
     );
-    // Uncomment to use conditional logic for mainnet vs goerli
-    // const { auctionHouse } =
-    //   env.CHAIN_ID === "1" ? getMainnetSdk(provider) : getGoerliSdk(provider);
     const { auctionHouse } = getMainnetSdk(provider);
     console.log(
       "settlementBlockNumber",
@@ -88,7 +90,7 @@ export const onAuctionCreated = functions
         endTime: endTime.toNumber(),
       };
 
-     const currentMatch = await database
+      const currentMatch = await database
         .ref("currentMatch")
         .get()
         .then((s) => s.val());
@@ -138,12 +140,11 @@ const startNewMatch = async (
     env.OPTIMISM_GOERLI_RPC_URL!
   );
   const { auctionHouse } = getMainnetSdk(mainnetProvider);
-  // env.CHAIN_ID === "1" ? getMainnetSdk(provider) : getGoerliSdk(provider);
-  // will need to change these conditions here| 420 chain id of optimism goerli | 10 chain id of optimism mainnet
-  const { nomoToken, nomoSeeder } = getOptimisticGoerliSdk(optimismProvider);
-  // env.CHAIN_ID === "420"
-  //   ? getOptimisticGoerliSdk(optimismProvider)
-  //   : getGoerliSdk(provider);
+
+  const { nomoToken, nomoSeeder } =
+    env.CHAIN_ID === "420"
+      ? getOptimisticGoerliSdk(optimismProvider)
+      : getOptimismSdk(optimismProvider);
 
   console.log("startNewMatchnomoToken", nomoToken.address);
   console.log("startNewMatchauctionHouse", auctionHouse.address);
@@ -173,8 +174,10 @@ const startNewMatch = async (
     settlementBlockNumber - 1
   );
   // testing to set seed nounId to current match nounId not current auction nounId
-    const seedNounId = prevMatch?.nounId ?? currentAuction.nounId;
-    console.log(`for this nounId ${currentAuction.nounId}, this is the prevMatch nounId ${prevMatch?.nounId} and this is the seed nounId being used ${seedNounId}`);
+  const seedNounId = prevMatch?.nounId ?? currentAuction.nounId;
+  console.log(
+    `for this nounId ${currentAuction.nounId}, this is the prevMatch nounId ${prevMatch?.nounId} and this is the seed nounId being used ${seedNounId}`
+  );
   const preSettlementBlocks = await Promise.all(
     candidateBlockNumbers.map((blockNumber) =>
       Promise.all([
