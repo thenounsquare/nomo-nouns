@@ -2,12 +2,12 @@ import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { env } from "node:process";
 import { ethers } from "ethers";
-import { range } from "lodash";
+import { get, range } from "lodash";
 import { getMatch, MatchData } from "../../common/match";
 import { Provider } from "@ethersproject/providers";
 import {
-  // getGoerliSdk,
   getMainnetSdk,
+  getOptimismSdk,
   getOptimisticGoerliSdk,
 } from "nomo-nouns-contract-sdks";
 import { increment } from "firebase/database";
@@ -142,10 +142,11 @@ const startNewMatch = async (
   const { auctionHouse } = getMainnetSdk(mainnetProvider);
   // env.CHAIN_ID === "1" ? getMainnetSdk(provider) : getGoerliSdk(provider);
   // will need to change these conditions here| 420 chain id of optimism goerli | 10 chain id of optimism mainnet
-  const { nomoToken, nomoSeeder } = getOptimisticGoerliSdk(optimismProvider);
-  // env.CHAIN_ID === "420"
-  //   ? getOptimisticGoerliSdk(optimismProvider)
-  //   : getGoerliSdk(provider);
+
+  const { nomoToken, nomoSeeder } =
+    env.CHAIN_ID === "420"
+      ? getOptimisticGoerliSdk(optimismProvider)
+      : getOptimismSdk(optimismProvider);
 
   console.log("startNewMatchnomoToken", nomoToken.address);
   console.log("startNewMatchauctionHouse", auctionHouse.address);
