@@ -2,7 +2,7 @@ import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { env } from "node:process";
 import { ethers } from "ethers";
-import { get, range } from "lodash";
+import { range } from "lodash";
 import { getMatch, MatchData } from "../../common/match";
 import { Provider } from "@ethersproject/providers";
 import {
@@ -63,9 +63,9 @@ export const onAuctionCreated = functions
     const settlementBlockNumber = parseInt(blockNum);
     const optimismProvider = new ethers.providers.AlchemyProvider(
       env.CHAIN_ID === "420" ? "optimism-goerli" : "optimism",
-      env.CHAIN_ID === "420"
-        ? env.OPTIMISM_GOERLI_RPC_URL!
-        : env.OPTIMISM_RPC_URL!
+      env.CHAIN_ID === "420" ?
+        env.OPTIMISM_GOERLI_RPC_URL! :
+        env.OPTIMISM_RPC_URL!
     );
     const provider = new ethers.providers.JsonRpcBatchProvider(
       env.JSON_RPC_URL!,
@@ -129,22 +129,22 @@ const startNewMatch = async (
   prevMatch: MatchData | null,
   currentAuction: AuctionData,
   settlementBlockNumber: number,
-  provider: Provider
+  optimismProvider: Provider
 ) => {
   const mainnetProvider = new ethers.providers.JsonRpcBatchProvider(
     env.MAINNET_RPC_URL!,
     ethers.providers.getNetwork("mainnet")
   );
-  const optimismProvider = new ethers.providers.AlchemyProvider(
-    "optimism-goerli",
-    env.OPTIMISM_GOERLI_RPC_URL!
-  );
+  // const optimismProvider = new ethers.providers.AlchemyProvider(
+  //   "optimism-goerli",
+  //   env.OPTIMISM_GOERLI_RPC_URL!
+  // );
   const { auctionHouse } = getMainnetSdk(mainnetProvider);
 
   const { nomoToken, nomoSeeder } =
-    env.CHAIN_ID === "420"
-      ? getOptimisticGoerliSdk(optimismProvider)
-      : getOptimismSdk(optimismProvider);
+    env.CHAIN_ID === "420" ?
+      getOptimisticGoerliSdk(optimismProvider) :
+      getOptimismSdk(optimismProvider);
 
   console.log("startNewMatchnomoToken", nomoToken.address);
   console.log("startNewMatchauctionHouse", auctionHouse.address);
@@ -178,6 +178,7 @@ const startNewMatch = async (
   console.log(
     `for this nounId ${currentAuction.nounId}, this is the prevMatch nounId ${prevMatch?.nounId} and this is the seed nounId being used ${seedNounId}`
   );
+  //
   const preSettlementBlocks = await Promise.all(
     candidateBlockNumbers.map((blockNumber) =>
       Promise.all([
@@ -187,7 +188,7 @@ const startNewMatch = async (
           timestamp: block.timestamp,
         })),
         nomoSeeder.generateSeed(
-          seedNounId,
+          currentAuction.nounId,
           mainnetProvider.getBlock(blockNumber).then((block) => block.hash),
           env.NOMO_DESCRIPTOR_ADDRESS!
         ),
@@ -252,14 +253,11 @@ export const signForMint = functions
         .get()
         .then((m) => m.val());
       const match = getMatch(matchData);
-      // conditionally check depending on node environment
       const provider = new ethers.providers.JsonRpcProvider(
-        process.env.JSON_RPC_URL!,
+        process.env.MAINNET_RPC_URL!,
         ethers.providers.getNetwork("mainnet")
       );
 
-      // const mainnetProvider = new ethers.providers.JsonRpcProvider(process.env.MAINNET_RPC_URL!);
-      // const goerliMainnetProvider = new ethers.providers.JsonRpcProvider(process.env.GOERLI_RPC_URL!);
 
       if (match.status !== "Selling") {
         throw new functions.https.HttpsError(
@@ -276,8 +274,6 @@ export const signForMint = functions
           },
         },
       } = match;
-      // get ethereum mainnet blockhash on production, else get ethereum goerli blockhash for development
-      // this line will need to use different providers based on node environment
       const electedBlockHash = await provider
         .getBlock(electedBlockNumber)
         .then((block) => (blocknumberHash = block.hash));
