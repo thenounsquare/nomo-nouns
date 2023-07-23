@@ -6,7 +6,7 @@
     "dev": "vite --mode preview",
     "dev:emulator": "vite --mode emulator",
     "emulator": "firebase --project dev emulators:start --import=./fixtures",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build --mode production",
     "preview": "vite preview"
   },
   "dependencies": {
