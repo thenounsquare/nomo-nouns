@@ -60,9 +60,9 @@ export const onAuctionCreated = functions
     const settlementBlockNumber = parseInt(blockNum);
     const optimismProvider = new ethers.providers.AlchemyProvider(
       env.CHAIN_ID === "420" ? "optimism-goerli" : "optimism",
-      env.CHAIN_ID === "420"
-        ? env.OPTIMISM_GOERLI_RPC_URL!
-        : env.OPTIMISM_RPC_URL!
+      env.CHAIN_ID === "420" ?
+        env.OPTIMISM_GOERLI_RPC_URL! :
+        env.OPTIMISM_RPC_URL!
     );
     const provider = new ethers.providers.JsonRpcBatchProvider(
       env.JSON_RPC_URL!,
@@ -139,9 +139,9 @@ const startNewMatch = async (
   const { auctionHouse } = getMainnetSdk(mainnetProvider);
 
   const { nomoToken, nomoSeeder } =
-    env.CHAIN_ID === "420"
-      ? getOptimisticGoerliSdk(optimismProvider)
-      : getOptimismSdk(optimismProvider);
+    env.CHAIN_ID === "420" ?
+      getOptimisticGoerliSdk(optimismProvider) :
+      getOptimismSdk(optimismProvider);
 
   console.log("startNewMatchnomoToken", nomoToken.address);
   console.log("startNewMatchauctionHouse", auctionHouse.address);
