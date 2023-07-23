@@ -5,7 +5,4 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react({})],
   appType: "spa",
-  define: {
-    __APP_ENV__: process.env.VITE_VERCEL_ENV,
-  },
 });
