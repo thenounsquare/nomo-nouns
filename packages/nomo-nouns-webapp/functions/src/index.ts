@@ -188,6 +188,7 @@ const startNewMatch = async (
           timestamp: block.timestamp,
         })),
         nomoSeeder.generateSeed(
+          // seedNounId,
           currentAuction.nounId,
           mainnetProvider.getBlock(blockNumber).then((block) => block.hash),
           env.NOMO_DESCRIPTOR_ADDRESS!
