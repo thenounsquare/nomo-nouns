@@ -49,10 +49,7 @@ type AuctionData = Pick<MatchData, "nounId" | "startTime" | "endTime">;
 export const onAuctionCreated = functions
   .runWith({
     memory: "512MB",
-    secrets: [
-      "JSON_RPC_URL",
-      env.CHAIN_ID === "420" ? "OPTIMISM_GOERLI_RPC_URL" : "OPTIMISM_RPC_URL",
-    ],
+    secrets: ["JSON_RPC_URL", "OPTIMISM_GOERLI_RPC_URL", "OPTIMISM_RPC_URL"],
   })
   .https.onRequest(async (req, resp) => {
     const {
@@ -258,7 +255,6 @@ export const signForMint = functions
         process.env.MAINNET_RPC_URL!,
         ethers.providers.getNetwork("mainnet")
       );
-
 
       if (match.status !== "Selling") {
         throw new functions.https.HttpsError(
