@@ -77,7 +77,7 @@ export const onAuctionCreated = functions
     );
     // attempt to grab and save currentMatch variable
     try {
-      const [nounId, startTime, endTime] = await auctionHouse.auction({
+      const [nounId, ,startTime, endTime] = await auctionHouse.auction({
         blockTag: settlementBlockNumber,
       });
       console.log("nounId, startTime, endTime", nounId, startTime, endTime);
@@ -93,7 +93,7 @@ export const onAuctionCreated = functions
         .then((s) => s.val());
 
       console.log("After Current Match");
-      console.log("currentMatch", currentMatch);
+      console.log("currentMatch", currentMatch === null? "null" : currentMatch.nounId);
       console.log("currentAuction", currentAuction);
 
       if (
