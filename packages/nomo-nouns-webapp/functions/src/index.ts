@@ -93,6 +93,8 @@ export const onAuctionCreated = functions
         .then((s) => s.val());
 
       console.log("After Current Match");
+      console.log("currentMatch", currentMatch);
+      console.log("currentAuction", currentAuction);
 
       if (
         currentMatch === null ||
@@ -103,13 +105,6 @@ export const onAuctionCreated = functions
           currentAuction,
           settlementBlockNumber,
           optimismProvider
-        );
-
-        console.log(
-          "settlementBlockNumber",
-          settlementBlockNumber,
-          "currentAuction",
-          currentAuction.nounId
         );
       } else {
         await extendCurrentMatch(currentAuction);
