@@ -175,27 +175,41 @@ const startNewMatch = async (
   console.log(
     `for this nounId ${currentAuction.nounId}, this is the prevMatch nounId ${prevMatch?.nounId} and this is the seed nounId being used ${seedNounId}`
   );
-  //
+
+ console.log("nomo seeder address", nomoSeeder.address);
+  optimismProvider.getNetwork().then((network) => {
+    console.log("optimism network", network);
+  });
   const preSettlementBlocks = await Promise.all(
-    candidateBlockNumbers.map((blockNumber) =>
-      Promise.all([
+    candidateBlockNumbers.map(async (blockNumber) => {
+      const [block, seedHash] = await Promise.all([
         mainnetProvider.getBlock(blockNumber).then((block) => ({
           number: blockNumber,
           hash: block.hash,
           timestamp: block.timestamp,
         })),
-        nomoSeeder.generateSeed(
-          // seedNounId,
-          currentAuction.nounId,
-          mainnetProvider.getBlock(blockNumber).then((block) => block.hash),
-          env.NOMO_DESCRIPTOR_ADDRESS!
-        ),
-      ]).then(([block, { accessory, background, body, glasses, head }]) => ({
+        mainnetProvider.getBlock(blockNumber).then((block) => block.hash),
+      ]);
+
+      const seed = await nomoSeeder.generateSeed(
+        currentAuction.nounId,
+        seedHash,
+        env.NOMO_DESCRIPTOR_ADDRESS!
+      );
+
+      return {
         ...block,
-        seed: { accessory, background, body, glasses, head },
-      }))
-    )
+        seed: {
+          accessory: seed.accessory,
+          background: seed.background,
+          body: seed.body,
+          glasses: seed.glasses,
+          head: seed.head,
+        },
+      };
+    })
   );
+
   // console.log(`for this nounId ${currentAuction.nounId}, these are the preSettlementBlocks, ${preSettlementBlocks}`);
   const fomoBlocks = preSettlementBlocks.filter(
     (block) => block.timestamp > prevAuction.endTime
