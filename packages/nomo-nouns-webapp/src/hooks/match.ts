@@ -13,9 +13,14 @@ import { useHttpsCallable } from "react-firebase-hooks/functions";
 import { useCallback, useEffect, useRef } from "react";
 import { useProvider, useSigner } from "wagmi";
 import { currentTimestamp } from "./useTimestamp";
-import { getGoerliSdk, getMainnetSdk } from "nomo-nouns-contract-sdks";
+import {
+  getGoerliSdk,
+  getOptimismSdk,
+  getOptimisticGoerliSdk,
+} from "nomo-nouns-contract-sdks";
 import { useQuery } from "react-query";
 import { useToast } from "@chakra-ui/react";
+import { getClient } from "../config/wagmi";
 
 export const match = () => {
   const database = useFirebaseState((state) => state.db);
@@ -60,9 +65,18 @@ export const useStartNextMatch = () => {
         mintingIncreaseInterval,
         mintingPriceIncreasePerInterval,
       } = currentMatch;
+      candidateBlocks.forEach((candidate) => {
+        console.log(
+          `this is one of the candidates on the front-end when calling start new match: \n currentMatch: ${
+            currentMatch.nounId + 1
+          } \n current hash  ${candidate.hash}, \ncandidate number: ${
+            candidate.number
+          }, \n candidate seed: ${candidate.seed}`
+        );
+      });
       const now = currentTimestamp();
-
       push(pastMatchesRef, currentMatch);
+      // here it increases the nounId by 1
       set(currentMatchRef, {
         nounId: currentMatch.nounId + 1,
         candidateBlocks,
@@ -139,26 +153,34 @@ export const useVoteFor = () => {
     []
   );
 };
-
 export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
   const functions = useFirebaseState((state) => state.functions);
   const [signForMint] = useHttpsCallable<
-    { nounId: number; blockNumber: number },
+    {
+      nounId: number;
+      blocknumberHash: string;
+      auctionStartTimestamp: number;
+      auctionEndTimestamp: number;
+    },
     string
   >(functions, "signForMint");
   const {
     nounId,
     status,
     electedNomoTally: {
-      block: { number: blockNumber },
+      block: { hash: blockNumberHash },
     },
   } = match;
+    console.log('nounId on front-end',nounId);
+    console.log('blockNumberHash on front-end',blockNumberHash);
   const { data: mintSignature } = useQuery(
-    ["mintSignature", nounId, blockNumber],
+    ["mintSignature", nounId, blockNumberHash],
     () =>
       signForMint({
         nounId,
-        blockNumber,
+        blocknumberHash: blockNumberHash,
+        auctionStartTimestamp: match.startTime,
+        auctionEndTimestamp: match.endTime,
       }).then((r) => {
         if (!r?.data) {
           throw "Couldn't get the mint signed";
@@ -175,16 +197,30 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
     return { canMint: false, mintNomo: undefined };
   }
 
+  //Should uncomment and add Optimism SDK
   const { nomoToken } = import.meta.env.PROD
-    ? getMainnetSdk(signer)
-    : getGoerliSdk(signer);
+    ? getOptimismSdk(signer)
+    : getOptimisticGoerliSdk(signer);
 
   const mintNomo = async (quantity: number) => {
     const mintPrice = getMintPrice(Math.floor(Date.now() / 1000), match);
+    const { hash } = match.electedNomoTally.block;
+    console.log(
+      `this is the elected nomo on the front-end \n \n nounId: ${nounId},\n blockNumberHash: ${blockNumberHash},\n auctionStartTimestamp: ${match.startTime}, \n auctionEndTimestamp: ${match.endTime},\n mintSignature: ${mintSignature}`
+    );
+
     return nomoToken
-      .mint(nounId, blockNumber, quantity, mintSignature, {
-        value: mintPrice.mul(quantity),
-      })
+      .mint(
+        nounId,
+        hash,
+        match.startTime,
+        match.endTime,
+        quantity,
+        mintSignature,
+        {
+          value: mintPrice.mul(quantity),
+        }
+      )
       .then((tx: { wait: () => void }) => tx.wait())
       .then(() => {
         toast({
@@ -219,8 +255,7 @@ export const useDisqualifiedNotification = (match: ActiveMatch) => {
   );
 
   const toast = useToast();
-  const provider = useProvider();
-
+  const provider = getClient().provider;
   useEffect(() => {
     Object.keys(match.disqualifiedWallets ?? {}).forEach((wallet) => {
       if (

@@ -51,7 +51,7 @@ export const NomoSaleCard: FC<NomoSaleCardProps> = ({ match, ...props }) => {
         (timeElapsedFromStart % match.mintingIncreaseInterval);
   const priceIncreaseCountdown = formatCountdown(secondsToNextPriceIncrease);
 
-  const { data: balance } = useBalance({ addressOrName: address });
+  const { data: balance } = useBalance({ address: address });
   const [mintQuantity, setMintQuantity] = useState(1);
   const { canMint, mintNomo } = useMintNomo(match);
   const onMint =
@@ -67,14 +67,13 @@ export const NomoSaleCard: FC<NomoSaleCardProps> = ({ match, ...props }) => {
   const totalCostString = formatEther(totalCost);
   const hasFundsToMint = !balance || balance.value.gte(totalCost);
   const saleOver = match.status === "Finished";
-
-  console.log({
-        isDisconnected ,
-      hasFundsToMint ,
-      canMint ,
-      isMinting ,
-      saleOver
-  })
+  // console.log({
+  //       isDisconnected ,
+  //     hasFundsToMint ,
+  //     canMint ,
+  //     isMinting ,
+  //     saleOver
+  // })
   return (
     <VStack alignItems={"center"} spacing={0} {...props}>
       <NomoCard

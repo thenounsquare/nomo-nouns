@@ -50,7 +50,7 @@ export declare namespace INomoNounsSeeder {
 
 export interface INomoNounsSeederInterface extends utils.Interface {
   functions: {
-    "generateSeed(uint256,uint256,address)": FunctionFragment;
+    "generateSeed(uint256,bytes32,address)": FunctionFragment;
   };
 
   getFunction(nameOrSignatureOrTopic: "generateSeed"): FunctionFragment;
@@ -59,7 +59,7 @@ export interface INomoNounsSeederInterface extends utils.Interface {
     functionFragment: "generateSeed",
     values: [
       PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BytesLike>,
       PromiseOrValue<string>
     ]
   ): string;
@@ -101,7 +101,7 @@ export interface INomoNounsSeeder extends BaseContract {
   functions: {
     generateSeed(
       nounId: PromiseOrValue<BigNumberish>,
-      blockNumber: PromiseOrValue<BigNumberish>,
+      nounBlocknumberHash: PromiseOrValue<BytesLike>,
       descriptor: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<[INomoNounsSeeder.SeedStructOutput]>;
@@ -109,7 +109,7 @@ export interface INomoNounsSeeder extends BaseContract {
 
   generateSeed(
     nounId: PromiseOrValue<BigNumberish>,
-    blockNumber: PromiseOrValue<BigNumberish>,
+    nounBlocknumberHash: PromiseOrValue<BytesLike>,
     descriptor: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<INomoNounsSeeder.SeedStructOutput>;
@@ -117,7 +117,7 @@ export interface INomoNounsSeeder extends BaseContract {
   callStatic: {
     generateSeed(
       nounId: PromiseOrValue<BigNumberish>,
-      blockNumber: PromiseOrValue<BigNumberish>,
+      nounBlocknumberHash: PromiseOrValue<BytesLike>,
       descriptor: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<INomoNounsSeeder.SeedStructOutput>;
@@ -128,7 +128,7 @@ export interface INomoNounsSeeder extends BaseContract {
   estimateGas: {
     generateSeed(
       nounId: PromiseOrValue<BigNumberish>,
-      blockNumber: PromiseOrValue<BigNumberish>,
+      nounBlocknumberHash: PromiseOrValue<BytesLike>,
       descriptor: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -137,7 +137,7 @@ export interface INomoNounsSeeder extends BaseContract {
   populateTransaction: {
     generateSeed(
       nounId: PromiseOrValue<BigNumberish>,
-      blockNumber: PromiseOrValue<BigNumberish>,
+      nounBlocknumberHash: PromiseOrValue<BytesLike>,
       descriptor: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;

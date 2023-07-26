@@ -229,7 +229,7 @@ const _abi = [
     stateMutability: "nonpayable",
     type: "function",
   },
-];
+] as const;
 
 export class INounsAuctionHouse__factory {
   static readonly abi = _abi;

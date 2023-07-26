@@ -78,20 +78,20 @@ export declare namespace IERC721A {
 
 export interface NomoNounsTokenInterface extends utils.Interface {
   functions: {
-    "_verify(uint256,uint256,bytes)": FunctionFragment;
+    "_verify(uint256,bytes32,uint256,uint256,bytes)": FunctionFragment;
     "approve(address,uint256)": FunctionFragment;
-    "auctionHouse()": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
     "contractURI()": FunctionFragment;
     "dataURI(uint256)": FunctionFragment;
     "descriptor()": FunctionFragment;
+    "eip712Domain()": FunctionFragment;
     "explicitOwnershipOf(uint256)": FunctionFragment;
     "explicitOwnershipsOf(uint256[])": FunctionFragment;
     "getApproved(uint256)": FunctionFragment;
     "getMintingPrice(uint256)": FunctionFragment;
     "getNounId(uint256)": FunctionFragment;
     "isApprovedForAll(address,address)": FunctionFragment;
-    "mint(uint256,uint256,uint256,bytes)": FunctionFragment;
+    "mint(uint256,bytes32,uint256,uint256,uint256,bytes)": FunctionFragment;
     "mintingIncreaseInterval()": FunctionFragment;
     "mintingPriceIncreasePerInterval()": FunctionFragment;
     "mintingStartPrice()": FunctionFragment;
@@ -130,11 +130,11 @@ export interface NomoNounsTokenInterface extends utils.Interface {
     nameOrSignatureOrTopic:
       | "_verify"
       | "approve"
-      | "auctionHouse"
       | "balanceOf"
       | "contractURI"
       | "dataURI"
       | "descriptor"
+      | "eip712Domain"
       | "explicitOwnershipOf"
       | "explicitOwnershipsOf"
       | "getApproved"
@@ -180,6 +180,8 @@ export interface NomoNounsTokenInterface extends utils.Interface {
     functionFragment: "_verify",
     values: [
       PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BytesLike>,
+      PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BytesLike>
     ]
@@ -187,10 +189,6 @@ export interface NomoNounsTokenInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "approve",
     values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "auctionHouse",
-    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "balanceOf",
@@ -206,6 +204,10 @@ export interface NomoNounsTokenInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "descriptor",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "eip712Domain",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -235,6 +237,8 @@ export interface NomoNounsTokenInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "mint",
     values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BytesLike>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
@@ -371,10 +375,6 @@ export interface NomoNounsTokenInterface extends utils.Interface {
 
   decodeFunctionResult(functionFragment: "_verify", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "auctionHouse",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "contractURI",
@@ -382,6 +382,10 @@ export interface NomoNounsTokenInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "dataURI", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "descriptor", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "eip712Domain",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "explicitOwnershipOf",
     data: BytesLike
@@ -504,6 +508,7 @@ export interface NomoNounsTokenInterface extends utils.Interface {
     "Approval(address,address,uint256)": EventFragment;
     "ApprovalForAll(address,address,bool)": EventFragment;
     "ConsecutiveTransfer(uint256,uint256,address,address)": EventFragment;
+    "EIP712DomainChanged()": EventFragment;
     "NomoCreated(uint256,tuple)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
     "Transfer(address,address,uint256)": EventFragment;
@@ -512,6 +517,7 @@ export interface NomoNounsTokenInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "Approval"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ApprovalForAll"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ConsecutiveTransfer"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "EIP712DomainChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NomoCreated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
@@ -554,6 +560,15 @@ export type ConsecutiveTransferEvent = TypedEvent<
 
 export type ConsecutiveTransferEventFilter =
   TypedEventFilter<ConsecutiveTransferEvent>;
+
+export interface EIP712DomainChangedEventObject {}
+export type EIP712DomainChangedEvent = TypedEvent<
+  [],
+  EIP712DomainChangedEventObject
+>;
+
+export type EIP712DomainChangedEventFilter =
+  TypedEventFilter<EIP712DomainChangedEvent>;
 
 export interface NomoCreatedEventObject {
   nounId: BigNumber;
@@ -619,7 +634,9 @@ export interface NomoNounsToken extends BaseContract {
   functions: {
     _verify(
       nounsId: PromiseOrValue<BigNumberish>,
-      blockNumber: PromiseOrValue<BigNumberish>,
+      blocknumberHash: PromiseOrValue<BytesLike>,
+      auctionStartTimestamp: PromiseOrValue<BigNumberish>,
+      auctionEndTimestamp: PromiseOrValue<BigNumberish>,
       signature: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<[string]>;
@@ -629,8 +646,6 @@ export interface NomoNounsToken extends BaseContract {
       tokenId: PromiseOrValue<BigNumberish>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
-
-    auctionHouse(overrides?: CallOverrides): Promise<[string]>;
 
     balanceOf(
       owner: PromiseOrValue<string>,
@@ -645,6 +660,20 @@ export interface NomoNounsToken extends BaseContract {
     ): Promise<[string]>;
 
     descriptor(overrides?: CallOverrides): Promise<[string]>;
+
+    eip712Domain(
+      overrides?: CallOverrides
+    ): Promise<
+      [string, string, string, BigNumber, string, string, BigNumber[]] & {
+        fields: string;
+        name: string;
+        version: string;
+        chainId: BigNumber;
+        verifyingContract: string;
+        salt: string;
+        extensions: BigNumber[];
+      }
+    >;
 
     explicitOwnershipOf(
       tokenId: PromiseOrValue<BigNumberish>,
@@ -679,7 +708,9 @@ export interface NomoNounsToken extends BaseContract {
 
     mint(
       nounId: PromiseOrValue<BigNumberish>,
-      blockNumber: PromiseOrValue<BigNumberish>,
+      blocknumberHash: PromiseOrValue<BytesLike>,
+      auctionStartTimestamp: PromiseOrValue<BigNumberish>,
+      auctionEndTimestamp: PromiseOrValue<BigNumberish>,
       quantity: PromiseOrValue<BigNumberish>,
       _signature: PromiseOrValue<BytesLike>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
@@ -837,7 +868,9 @@ export interface NomoNounsToken extends BaseContract {
 
   _verify(
     nounsId: PromiseOrValue<BigNumberish>,
-    blockNumber: PromiseOrValue<BigNumberish>,
+    blocknumberHash: PromiseOrValue<BytesLike>,
+    auctionStartTimestamp: PromiseOrValue<BigNumberish>,
+    auctionEndTimestamp: PromiseOrValue<BigNumberish>,
     signature: PromiseOrValue<BytesLike>,
     overrides?: CallOverrides
   ): Promise<string>;
@@ -847,8 +880,6 @@ export interface NomoNounsToken extends BaseContract {
     tokenId: PromiseOrValue<BigNumberish>,
     overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
-
-  auctionHouse(overrides?: CallOverrides): Promise<string>;
 
   balanceOf(
     owner: PromiseOrValue<string>,
@@ -863,6 +894,20 @@ export interface NomoNounsToken extends BaseContract {
   ): Promise<string>;
 
   descriptor(overrides?: CallOverrides): Promise<string>;
+
+  eip712Domain(
+    overrides?: CallOverrides
+  ): Promise<
+    [string, string, string, BigNumber, string, string, BigNumber[]] & {
+      fields: string;
+      name: string;
+      version: string;
+      chainId: BigNumber;
+      verifyingContract: string;
+      salt: string;
+      extensions: BigNumber[];
+    }
+  >;
 
   explicitOwnershipOf(
     tokenId: PromiseOrValue<BigNumberish>,
@@ -897,7 +942,9 @@ export interface NomoNounsToken extends BaseContract {
 
   mint(
     nounId: PromiseOrValue<BigNumberish>,
-    blockNumber: PromiseOrValue<BigNumberish>,
+    blocknumberHash: PromiseOrValue<BytesLike>,
+    auctionStartTimestamp: PromiseOrValue<BigNumberish>,
+    auctionEndTimestamp: PromiseOrValue<BigNumberish>,
     quantity: PromiseOrValue<BigNumberish>,
     _signature: PromiseOrValue<BytesLike>,
     overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
@@ -1053,7 +1100,9 @@ export interface NomoNounsToken extends BaseContract {
   callStatic: {
     _verify(
       nounsId: PromiseOrValue<BigNumberish>,
-      blockNumber: PromiseOrValue<BigNumberish>,
+      blocknumberHash: PromiseOrValue<BytesLike>,
+      auctionStartTimestamp: PromiseOrValue<BigNumberish>,
+      auctionEndTimestamp: PromiseOrValue<BigNumberish>,
       signature: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<string>;
@@ -1063,8 +1112,6 @@ export interface NomoNounsToken extends BaseContract {
       tokenId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
-
-    auctionHouse(overrides?: CallOverrides): Promise<string>;
 
     balanceOf(
       owner: PromiseOrValue<string>,
@@ -1079,6 +1126,20 @@ export interface NomoNounsToken extends BaseContract {
     ): Promise<string>;
 
     descriptor(overrides?: CallOverrides): Promise<string>;
+
+    eip712Domain(
+      overrides?: CallOverrides
+    ): Promise<
+      [string, string, string, BigNumber, string, string, BigNumber[]] & {
+        fields: string;
+        name: string;
+        version: string;
+        chainId: BigNumber;
+        verifyingContract: string;
+        salt: string;
+        extensions: BigNumber[];
+      }
+    >;
 
     explicitOwnershipOf(
       tokenId: PromiseOrValue<BigNumberish>,
@@ -1113,7 +1174,9 @@ export interface NomoNounsToken extends BaseContract {
 
     mint(
       nounId: PromiseOrValue<BigNumberish>,
-      blockNumber: PromiseOrValue<BigNumberish>,
+      blocknumberHash: PromiseOrValue<BytesLike>,
+      auctionStartTimestamp: PromiseOrValue<BigNumberish>,
+      auctionEndTimestamp: PromiseOrValue<BigNumberish>,
       quantity: PromiseOrValue<BigNumberish>,
       _signature: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
@@ -1301,6 +1364,9 @@ export interface NomoNounsToken extends BaseContract {
       to?: PromiseOrValue<string> | null
     ): ConsecutiveTransferEventFilter;
 
+    "EIP712DomainChanged()"(): EIP712DomainChangedEventFilter;
+    EIP712DomainChanged(): EIP712DomainChangedEventFilter;
+
     "NomoCreated(uint256,tuple)"(
       nounId?: PromiseOrValue<BigNumberish> | null,
       seed?: null
@@ -1334,7 +1400,9 @@ export interface NomoNounsToken extends BaseContract {
   estimateGas: {
     _verify(
       nounsId: PromiseOrValue<BigNumberish>,
-      blockNumber: PromiseOrValue<BigNumberish>,
+      blocknumberHash: PromiseOrValue<BytesLike>,
+      auctionStartTimestamp: PromiseOrValue<BigNumberish>,
+      auctionEndTimestamp: PromiseOrValue<BigNumberish>,
       signature: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -1344,8 +1412,6 @@ export interface NomoNounsToken extends BaseContract {
       tokenId: PromiseOrValue<BigNumberish>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
-
-    auctionHouse(overrides?: CallOverrides): Promise<BigNumber>;
 
     balanceOf(
       owner: PromiseOrValue<string>,
@@ -1360,6 +1426,8 @@ export interface NomoNounsToken extends BaseContract {
     ): Promise<BigNumber>;
 
     descriptor(overrides?: CallOverrides): Promise<BigNumber>;
+
+    eip712Domain(overrides?: CallOverrides): Promise<BigNumber>;
 
     explicitOwnershipOf(
       tokenId: PromiseOrValue<BigNumberish>,
@@ -1394,7 +1462,9 @@ export interface NomoNounsToken extends BaseContract {
 
     mint(
       nounId: PromiseOrValue<BigNumberish>,
-      blockNumber: PromiseOrValue<BigNumberish>,
+      blocknumberHash: PromiseOrValue<BytesLike>,
+      auctionStartTimestamp: PromiseOrValue<BigNumberish>,
+      auctionEndTimestamp: PromiseOrValue<BigNumberish>,
       quantity: PromiseOrValue<BigNumberish>,
       _signature: PromiseOrValue<BytesLike>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
@@ -1544,7 +1614,9 @@ export interface NomoNounsToken extends BaseContract {
   populateTransaction: {
     _verify(
       nounsId: PromiseOrValue<BigNumberish>,
-      blockNumber: PromiseOrValue<BigNumberish>,
+      blocknumberHash: PromiseOrValue<BytesLike>,
+      auctionStartTimestamp: PromiseOrValue<BigNumberish>,
+      auctionEndTimestamp: PromiseOrValue<BigNumberish>,
       signature: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -1554,8 +1626,6 @@ export interface NomoNounsToken extends BaseContract {
       tokenId: PromiseOrValue<BigNumberish>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
-
-    auctionHouse(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     balanceOf(
       owner: PromiseOrValue<string>,
@@ -1570,6 +1640,8 @@ export interface NomoNounsToken extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     descriptor(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    eip712Domain(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     explicitOwnershipOf(
       tokenId: PromiseOrValue<BigNumberish>,
@@ -1604,7 +1676,9 @@ export interface NomoNounsToken extends BaseContract {
 
     mint(
       nounId: PromiseOrValue<BigNumberish>,
-      blockNumber: PromiseOrValue<BigNumberish>,
+      blocknumberHash: PromiseOrValue<BytesLike>,
+      auctionStartTimestamp: PromiseOrValue<BigNumberish>,
+      auctionEndTimestamp: PromiseOrValue<BigNumberish>,
       quantity: PromiseOrValue<BigNumberish>,
       _signature: PromiseOrValue<BytesLike>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }

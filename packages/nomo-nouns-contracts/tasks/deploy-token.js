@@ -27,20 +27,14 @@ task("deploy-token", "Deploy Nomo token contract")
   )
   .addOptionalParam(
     "signer",
-    "Signer address to sign minting                 ",
+    "Signer address to sign minting",
     "0x1B578146656673402d9B3BFd4b8a3636B8EAf1fa",
-    types.string
-  )
-  .addOptionalParam(
-    "auctionHouse",
-    "The NounsAuctionHouseProxy contract address",
-    "0x830BD73E4184ceF73443C15111a1DF14e495C706",
     types.string
   )
   .addOptionalParam(
     "seeder",
     "The NomoNounsSeeder contract address",
-    "0xb5fCF67C2ec74248692AfCCFDd5d22De49187CAc",
+    "0xD5CA8ad163a342Bb769C5157934C9F1cC2b0EFC6",
     types.string
   )
   .addOptionalParam(
@@ -58,7 +52,6 @@ task("deploy-token", "Deploy Nomo token contract")
         mintingPriceIncreasePerInterval,
         withdrawWallet,
         signer,
-        auctionHouse,
         seeder,
         descriptor,
       },
@@ -81,7 +74,6 @@ task("deploy-token", "Deploy Nomo token contract")
         mintingPriceIncreasePerInterval,
         withdrawWallet,
         signer,
-        auctionHouse,
         seeder,
         descriptor
       );
@@ -89,6 +81,21 @@ task("deploy-token", "Deploy Nomo token contract")
       await nomoNouns.deployed();
 
       console.log("NomoNouns contract deployed to: ", nomoNouns.address);
+
+      // Uncomment for Etherscan verification
+      // await hre.run("verify:verify", {
+      //   address: nomoNouns.address,
+      //   constructorArguments: [
+      //     mintingStartPrice,
+      //     mintingIncreaseInterval,
+      //     mintingPriceIncreasePerInterval,
+      //     withdrawWallet,
+      //     signer,
+      //     seeder,
+      //     descriptor,
+      //   ],
+      // });
+      
 
       console.log(
         "verification params:",
@@ -98,7 +105,6 @@ task("deploy-token", "Deploy Nomo token contract")
         mintingPriceIncreasePerInterval,
         withdrawWallet,
         signer,
-        auctionHouse,
         seeder,
         descriptor
       );
