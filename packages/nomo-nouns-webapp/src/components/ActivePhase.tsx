@@ -115,8 +115,8 @@ export const CandidatesGrid: FC<CandidatesGridProps> = ({
       : activeCandidates.length > 2
       ? useBreakpointValue(["96px", "160px"])
       : useBreakpointValue(["160px", "320px"]);
+      const eliminatedCandidatesWidth = useBreakpointValue(["64px", "96px"]);
 
-  const eliminatedCandidatesWidth = useBreakpointValue(["64px", "96px"]);
   return (
     <LayoutGroup>
       <VStack

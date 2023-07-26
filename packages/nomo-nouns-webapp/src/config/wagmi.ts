@@ -1,18 +1,20 @@
-import { chain, configureChains, createClient } from "wagmi";
+import { configureChains, createClient } from "wagmi";
+import { optimismGoerli, optimism } from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { InjectedConnector } from "wagmi/connectors/injected";
-import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
+import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
 import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
 
 export const getClient = () => {
   const { chains, provider, webSocketProvider } = configureChains(
-    [import.meta.env.DEV ? chain.goerli : chain.mainnet],
+    [import.meta.env.DEV ? optimismGoerli : optimism],
     [
       alchemyProvider({
         apiKey: import.meta.env.VITE_ALCHEMY_APP_KEY,
         priority: 0,
       }),
+      
     ],
     { pollingInterval: 60000 }
   );

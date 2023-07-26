@@ -2,7 +2,7 @@
 
 /// @title The NounsToken pseudo-random seed generator
 /// this Nouns Seeder has been modified for Nomo Nouns purpose
-/// we add blockNumber as parameter
+/// we add nounBlocknumberHash as parameter
 
 /*********************************
  * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ *
@@ -24,12 +24,12 @@ import {INomoNounsDescriptor} from "./interfaces/INomoNounsDescriptor.sol";
 
 contract NomoNounsSeeder is INomoNounsSeeder {
     /**
-     * @notice Generate a pseudo-random Noun seed using the provided blockhash and noun ID.
+     * @notice Generate a pseudo-random Noun seed using a provided seed value from the original Noun blockhash and noun ID.
      */
     // prettier-ignore
-    function generateSeed(uint256 nounId, uint256 blockNumber, INomoNounsDescriptor descriptor) external view override returns (INomoNounsSeeder.Seed memory) {
+    function generateSeed(uint256 nounId, bytes32 nounBlocknumberHash, INomoNounsDescriptor descriptor) external view override returns (INomoNounsSeeder.Seed memory) {
         uint256 pseudorandomness = uint256(
-            keccak256(abi.encodePacked(blockhash(blockNumber), nounId))
+            keccak256(abi.encodePacked(nounBlocknumberHash, nounId))
         );
 
         uint256 backgroundCount = descriptor.backgroundCount();

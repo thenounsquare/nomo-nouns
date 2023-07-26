@@ -8,9 +8,9 @@ import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol';
 import {IERC721A, ERC721A} from "erc721a/contracts/ERC721A.sol";
 import {ERC721AQueryable} from "erc721a/contracts/extensions/ERC721AQueryable.sol";
-import {INounsAuctionHouseExtra} from './interfaces/INounsAuctionHouseExtra.sol';
 import {INomoNounsSeeder} from "./interfaces/INomoNounsSeeder.sol";
 import {INomoNounsDescriptor} from "./interfaces/INomoNounsDescriptor.sol";
+
 
 contract NomoNounsToken is ERC721A, ERC721AQueryable, EIP712, Ownable {
     using ECDSA for bytes32;
@@ -29,9 +29,6 @@ contract NomoNounsToken is ERC721A, ERC721AQueryable, EIP712, Ownable {
 
     // The Nouns token seeder
     INomoNounsSeeder public seeder;
-
-    // The Nouns token seeder
-    INounsAuctionHouseExtra public auctionHouse;
 
     // The noun seeds
     mapping(uint256 => INomoNounsSeeder.Seed) public seeds;
@@ -63,7 +60,6 @@ contract NomoNounsToken is ERC721A, ERC721AQueryable, EIP712, Ownable {
         uint256 _mintingPriceIncreasePerInterval,
         address _withdrawWallet,
         address _signer,
-        INounsAuctionHouseExtra _auctionHouse,
         INomoNounsSeeder _seeder,
         INomoNounsDescriptor _descriptor
     ) ERC721A('Nomo Nouns', 'NOMO') EIP712('NOMONOUNS', '1') {
@@ -72,35 +68,33 @@ contract NomoNounsToken is ERC721A, ERC721AQueryable, EIP712, Ownable {
         mintingPriceIncreasePerInterval = _mintingPriceIncreasePerInterval;
         withdrawWallet = _withdrawWallet;
         signer = _signer;
-        auctionHouse = _auctionHouse;
         seeder = _seeder;
         descriptor = _descriptor;
     }
 
     /// @notice minting logic
     /// @param nounId nounsId
-    /// @param blockNumber block number for seeds
+    /// @param blocknumberHash number for seeds
     function mint(
         uint256 nounId,
-        uint256 blockNumber,
+        bytes32 blocknumberHash,
+        uint256 auctionStartTimestamp,
+        uint256 auctionEndTimestamp,
         uint256 quantity,
         bytes calldata _signature
     ) public payable returns (uint256) {
+        
         // validate signature
-        require(signer == _verify(nounId, blockNumber, _signature), 'Invalid signature');
+        require(signer ==_verify(nounId, blocknumberHash, auctionStartTimestamp, auctionEndTimestamp, _signature), 'Invalid signature');
 
         // check endTime minting
-        require(block.timestamp < auctionHouse.auction().endTime, 'Minting expired');
-
-        // nounId parameter must be same as nounId in auction
-        require(nounId == auctionHouse.auction().nounId, 'NounId invalid');
+        require(block.timestamp < auctionEndTimestamp, 'Minting expired');
 
         // check ETH being paid is sufficient
-        uint256 mintingStartTime = auctionHouse.auction().startTime;
-        uint256 totalCost = getMintingPrice(mintingStartTime) * quantity;
+        uint256 totalCost = getMintingPrice(auctionStartTimestamp) * quantity;
         require(msg.value >= totalCost, 'Not enough ETH to pay');
 
-        return _mintTo(msg.sender, nounId, blockNumber, quantity);
+        return _mintTo(msg.sender, nounId, blocknumberHash, quantity);
     }
 
     /// @notice Calculate minting price
@@ -220,12 +214,12 @@ contract NomoNounsToken is ERC721A, ERC721AQueryable, EIP712, Ownable {
     function _mintTo(
         address to,
         uint256 nounId,
-        uint256 blockNumber,
+        bytes32 blocknumberHash,
         uint256 quantity
     ) internal returns (uint256) {
         if (seeds[nounId].nounId == 0) {
             nounIdOfNomo[_nextTokenId()] = nounId;
-            seeds[nounId] = seeder.generateSeed(nounId, blockNumber, descriptor);
+            seeds[nounId] = seeder.generateSeed(nounId, blocknumberHash, descriptor);
             emit NomoCreated(nounId, seeds[nounId]);
         }
 
@@ -236,11 +230,15 @@ contract NomoNounsToken is ERC721A, ERC721AQueryable, EIP712, Ownable {
 
     function _verify(
         uint256 nounsId,
-        uint256 blockNumber,
+        bytes32 blocknumberHash,
+        uint256 auctionStartTimestamp,
+        uint256 auctionEndTimestamp,
         bytes calldata signature
     ) public view returns (address) {
-        bytes32 TYPEHASH = keccak256('Minter(uint256 nounsId,uint256 blockNumber)');
-        bytes32 digest = _hashTypedDataV4(keccak256(abi.encode(TYPEHASH, nounsId, blockNumber)));
+        bytes32 TYPEHASH = keccak256('Minter(uint256 nounsId,bytes32 blocknumberHash,uint256 auctionStartTimestamp,uint256 auctionEndTimestamp)');
+        
+        bytes32 digest = _hashTypedDataV4(keccak256(abi.encode(TYPEHASH, nounsId, blocknumberHash, auctionStartTimestamp, auctionEndTimestamp)));
+
         return ECDSA.recover(digest, signature);
     }
 }

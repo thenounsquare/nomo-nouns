@@ -102,84 +102,84 @@ export interface AuctionBidEventObject {
     value: BigNumber;
     extended: boolean;
 }
-export declare type AuctionBidEvent = TypedEvent<[
+export type AuctionBidEvent = TypedEvent<[
     BigNumber,
     string,
     BigNumber,
     boolean
 ], AuctionBidEventObject>;
-export declare type AuctionBidEventFilter = TypedEventFilter<AuctionBidEvent>;
+export type AuctionBidEventFilter = TypedEventFilter<AuctionBidEvent>;
 export interface AuctionCreatedEventObject {
     nounId: BigNumber;
     startTime: BigNumber;
     endTime: BigNumber;
 }
-export declare type AuctionCreatedEvent = TypedEvent<[
+export type AuctionCreatedEvent = TypedEvent<[
     BigNumber,
     BigNumber,
     BigNumber
 ], AuctionCreatedEventObject>;
-export declare type AuctionCreatedEventFilter = TypedEventFilter<AuctionCreatedEvent>;
+export type AuctionCreatedEventFilter = TypedEventFilter<AuctionCreatedEvent>;
 export interface AuctionExtendedEventObject {
     nounId: BigNumber;
     endTime: BigNumber;
 }
-export declare type AuctionExtendedEvent = TypedEvent<[
+export type AuctionExtendedEvent = TypedEvent<[
     BigNumber,
     BigNumber
 ], AuctionExtendedEventObject>;
-export declare type AuctionExtendedEventFilter = TypedEventFilter<AuctionExtendedEvent>;
+export type AuctionExtendedEventFilter = TypedEventFilter<AuctionExtendedEvent>;
 export interface AuctionMinBidIncrementPercentageUpdatedEventObject {
     minBidIncrementPercentage: BigNumber;
 }
-export declare type AuctionMinBidIncrementPercentageUpdatedEvent = TypedEvent<[
+export type AuctionMinBidIncrementPercentageUpdatedEvent = TypedEvent<[
     BigNumber
 ], AuctionMinBidIncrementPercentageUpdatedEventObject>;
-export declare type AuctionMinBidIncrementPercentageUpdatedEventFilter = TypedEventFilter<AuctionMinBidIncrementPercentageUpdatedEvent>;
+export type AuctionMinBidIncrementPercentageUpdatedEventFilter = TypedEventFilter<AuctionMinBidIncrementPercentageUpdatedEvent>;
 export interface AuctionReservePriceUpdatedEventObject {
     reservePrice: BigNumber;
 }
-export declare type AuctionReservePriceUpdatedEvent = TypedEvent<[
+export type AuctionReservePriceUpdatedEvent = TypedEvent<[
     BigNumber
 ], AuctionReservePriceUpdatedEventObject>;
-export declare type AuctionReservePriceUpdatedEventFilter = TypedEventFilter<AuctionReservePriceUpdatedEvent>;
+export type AuctionReservePriceUpdatedEventFilter = TypedEventFilter<AuctionReservePriceUpdatedEvent>;
 export interface AuctionSettledEventObject {
     nounId: BigNumber;
     winner: string;
     amount: BigNumber;
 }
-export declare type AuctionSettledEvent = TypedEvent<[
+export type AuctionSettledEvent = TypedEvent<[
     BigNumber,
     string,
     BigNumber
 ], AuctionSettledEventObject>;
-export declare type AuctionSettledEventFilter = TypedEventFilter<AuctionSettledEvent>;
+export type AuctionSettledEventFilter = TypedEventFilter<AuctionSettledEvent>;
 export interface AuctionTimeBufferUpdatedEventObject {
     timeBuffer: BigNumber;
 }
-export declare type AuctionTimeBufferUpdatedEvent = TypedEvent<[
+export type AuctionTimeBufferUpdatedEvent = TypedEvent<[
     BigNumber
 ], AuctionTimeBufferUpdatedEventObject>;
-export declare type AuctionTimeBufferUpdatedEventFilter = TypedEventFilter<AuctionTimeBufferUpdatedEvent>;
+export type AuctionTimeBufferUpdatedEventFilter = TypedEventFilter<AuctionTimeBufferUpdatedEvent>;
 export interface OwnershipTransferredEventObject {
     previousOwner: string;
     newOwner: string;
 }
-export declare type OwnershipTransferredEvent = TypedEvent<[
+export type OwnershipTransferredEvent = TypedEvent<[
     string,
     string
 ], OwnershipTransferredEventObject>;
-export declare type OwnershipTransferredEventFilter = TypedEventFilter<OwnershipTransferredEvent>;
+export type OwnershipTransferredEventFilter = TypedEventFilter<OwnershipTransferredEvent>;
 export interface PausedEventObject {
     account: string;
 }
-export declare type PausedEvent = TypedEvent<[string], PausedEventObject>;
-export declare type PausedEventFilter = TypedEventFilter<PausedEvent>;
+export type PausedEvent = TypedEvent<[string], PausedEventObject>;
+export type PausedEventFilter = TypedEventFilter<PausedEvent>;
 export interface UnpausedEventObject {
     account: string;
 }
-export declare type UnpausedEvent = TypedEvent<[string], UnpausedEventObject>;
-export declare type UnpausedEventFilter = TypedEventFilter<UnpausedEvent>;
+export type UnpausedEvent = TypedEvent<[string], UnpausedEventObject>;
+export type UnpausedEventFilter = TypedEventFilter<UnpausedEvent>;
 export interface AuctionHouse extends BaseContract {
     connect(signerOrProvider: Signer | Provider | string): this;
     attach(addressOrName: string): this;

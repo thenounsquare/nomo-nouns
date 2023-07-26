@@ -1,6 +1,6 @@
 {
   "name": "nomo-nouns-contract-sdks",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "private": true,
   "main": "index.cjs",
   "module": "index.mjs",

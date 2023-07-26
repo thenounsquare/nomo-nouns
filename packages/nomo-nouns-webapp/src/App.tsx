@@ -26,6 +26,7 @@ function App() {
       overflow={"hidden"}
       justifyContent={"stretch"}
     >
+      {import.meta.env.PROD ? <h1>Production</h1> : <h1>Development</h1>}
       <Header />
       <MatchSection />
       <Footer />

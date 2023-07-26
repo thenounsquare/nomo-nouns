@@ -234,65 +234,65 @@ export interface ApprovalEventObject {
     approved: string;
     tokenId: BigNumber;
 }
-export declare type ApprovalEvent = TypedEvent<[
+export type ApprovalEvent = TypedEvent<[
     string,
     string,
     BigNumber
 ], ApprovalEventObject>;
-export declare type ApprovalEventFilter = TypedEventFilter<ApprovalEvent>;
+export type ApprovalEventFilter = TypedEventFilter<ApprovalEvent>;
 export interface ApprovalForAllEventObject {
     owner: string;
     operator: string;
     approved: boolean;
 }
-export declare type ApprovalForAllEvent = TypedEvent<[
+export type ApprovalForAllEvent = TypedEvent<[
     string,
     string,
     boolean
 ], ApprovalForAllEventObject>;
-export declare type ApprovalForAllEventFilter = TypedEventFilter<ApprovalForAllEvent>;
+export type ApprovalForAllEventFilter = TypedEventFilter<ApprovalForAllEvent>;
 export interface ConsecutiveTransferEventObject {
     fromTokenId: BigNumber;
     toTokenId: BigNumber;
     from: string;
     to: string;
 }
-export declare type ConsecutiveTransferEvent = TypedEvent<[
+export type ConsecutiveTransferEvent = TypedEvent<[
     BigNumber,
     BigNumber,
     string,
     string
 ], ConsecutiveTransferEventObject>;
-export declare type ConsecutiveTransferEventFilter = TypedEventFilter<ConsecutiveTransferEvent>;
+export type ConsecutiveTransferEventFilter = TypedEventFilter<ConsecutiveTransferEvent>;
 export interface NomoCreatedEventObject {
     nounId: BigNumber;
     seed: INomoNounsSeeder.SeedStructOutput;
 }
-export declare type NomoCreatedEvent = TypedEvent<[
+export type NomoCreatedEvent = TypedEvent<[
     BigNumber,
     INomoNounsSeeder.SeedStructOutput
 ], NomoCreatedEventObject>;
-export declare type NomoCreatedEventFilter = TypedEventFilter<NomoCreatedEvent>;
+export type NomoCreatedEventFilter = TypedEventFilter<NomoCreatedEvent>;
 export interface OwnershipTransferredEventObject {
     previousOwner: string;
     newOwner: string;
 }
-export declare type OwnershipTransferredEvent = TypedEvent<[
+export type OwnershipTransferredEvent = TypedEvent<[
     string,
     string
 ], OwnershipTransferredEventObject>;
-export declare type OwnershipTransferredEventFilter = TypedEventFilter<OwnershipTransferredEvent>;
+export type OwnershipTransferredEventFilter = TypedEventFilter<OwnershipTransferredEvent>;
 export interface TransferEventObject {
     from: string;
     to: string;
     tokenId: BigNumber;
 }
-export declare type TransferEvent = TypedEvent<[
+export type TransferEvent = TypedEvent<[
     string,
     string,
     BigNumber
 ], TransferEventObject>;
-export declare type TransferEventFilter = TypedEventFilter<TransferEvent>;
+export type TransferEventFilter = TypedEventFilter<TransferEvent>;
 export interface NomoToken extends BaseContract {
     connect(signerOrProvider: Signer | Provider | string): this;
     attach(addressOrName: string): this;

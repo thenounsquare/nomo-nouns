@@ -5,8 +5,13 @@ import { ethers } from "ethers";
 import { range } from "lodash";
 import { getMatch, MatchData } from "../../common/match";
 import { Provider } from "@ethersproject/providers";
-import { getGoerliSdk, getMainnetSdk } from "nomo-nouns-contract-sdks";
+import {
+  getMainnetSdk,
+  getOptimismSdk,
+  getOptimisticGoerliSdk,
+} from "nomo-nouns-contract-sdks";
 import { increment } from "firebase/database";
+// import { Bytes, BigNumber } from "ethers";
 
 admin.initializeApp();
 const database = admin.database();
@@ -23,7 +28,9 @@ const domain = {
 const types = {
   Minter: [
     { name: "nounsId", type: "uint256" },
-    { name: "blockNumber", type: "uint256" },
+    { name: "blocknumberHash", type: "bytes32" },
+    { name: "auctionStartTimestamp", type: "uint256" },
+    { name: "auctionEndTimestamp", type: "uint256" },
   ],
 };
 
@@ -40,63 +47,102 @@ type AuctionPayload = {
 type AuctionData = Pick<MatchData, "nounId" | "startTime" | "endTime">;
 
 export const onAuctionCreated = functions
-  .runWith({ memory: "512MB", secrets: ["JSON_RPC_URL"] })
+  .runWith({
+    memory: "512MB",
+    secrets: ["JSON_RPC_URL", "OPTIMISM_GOERLI_RPC_URL", "OPTIMISM_RPC_URL"],
+  })
   .https.onRequest(async (req, resp) => {
     const {
       event: {
         activity: [{ blockNum }],
       },
     } = req.body as AuctionPayload;
-
     const settlementBlockNumber = parseInt(blockNum);
-
+    const optimismProvider = new ethers.providers.AlchemyProvider(
+      env.CHAIN_ID === "420" ? "optimism-goerli" : "optimism",
+      env.CHAIN_ID === "420" ?
+        env.OPTIMISM_GOERLI_RPC_URL! :
+        env.OPTIMISM_RPC_URL!
+    );
     const provider = new ethers.providers.JsonRpcBatchProvider(
       env.JSON_RPC_URL!,
-      ethers.providers.getNetwork(env.CHAIN_ID === "1" ? "mainnet" : "goerli")
+      ethers.providers.getNetwork("mainnet")
     );
+    const { auctionHouse } = getMainnetSdk(provider);
+    console.log(
+      "settlementBlockNumber",
+      settlementBlockNumber,
+      "auctionHouse.address",
+      auctionHouse.address
+    );
+    // attempt to grab and save currentMatch variable
+    try {
+      const [nounId, , startTime, endTime] = await auctionHouse.auction({
+        blockTag: settlementBlockNumber,
+      });
+      console.log("nounId, startTime, endTime", nounId, startTime, endTime);
+      const currentAuction = {
+        nounId: nounId.toNumber(),
+        startTime: startTime.toNumber(),
+        endTime: endTime.toNumber(),
+      };
 
-    const { auctionHouse } =
-      env.CHAIN_ID === "1" ? getMainnetSdk(provider) : getGoerliSdk(provider);
+      const currentMatch = await database
+        .ref("currentMatch")
+        .get()
+        .then((s) => s.val());
 
-    const [nounId, , startTime, endTime] = await auctionHouse.auction({
-      blockTag: settlementBlockNumber,
-    });
-    const currentAuction = {
-      nounId: nounId.toNumber(),
-      startTime: startTime.toNumber(),
-      endTime: endTime.toNumber(),
-    };
+      console.log("After Current Match");
+      console.log("currentMatch", currentMatch === null? "null" : currentMatch.nounId);
+      console.log("currentAuction", currentAuction);
 
-    const currentMatch = await database
-      .ref("currentMatch")
-      .get()
-      .then((s) => s.val());
+      if (
+        currentMatch === null ||
+        currentAuction.nounId !== currentMatch.nounId
+      ) {
+        await startNewMatch(
+          currentMatch,
+          currentAuction,
+          settlementBlockNumber,
+          optimismProvider,
+          provider
+        );
+      } else {
+        await extendCurrentMatch(currentAuction);
+      }
 
-    if (
-      currentMatch === null ||
-      currentAuction.nounId !== currentMatch.nounId
-    ) {
-      await startNewMatch(
-        currentMatch,
-        currentAuction,
-        settlementBlockNumber,
-        provider
-      );
-    } else {
-      await extendCurrentMatch(currentAuction);
+      resp.sendStatus(200);
+    } catch (error) {
+      console.error("onAuctionCreatedError", error);
+      resp.sendStatus(500);
     }
-
-    resp.sendStatus(200);
   });
 
 const startNewMatch = async (
   prevMatch: MatchData | null,
   currentAuction: AuctionData,
   settlementBlockNumber: number,
-  provider: Provider
+  optimismProvider: Provider,
+  mainnetProvider: Provider
 ) => {
-  const { auctionHouse, nomoToken, nomoSeeder } =
-    env.CHAIN_ID === "1" ? getMainnetSdk(provider) : getGoerliSdk(provider);
+  // const mainnetProvider = new ethers.providers.JsonRpcBatchProvider(
+  //   env.MAINNET_RPC_URL!,
+  //   ethers.providers.getNetwork("mainnet")
+  // );
+  // const optimismProvider = new ethers.providers.AlchemyProvider(
+  //   "optimism-goerli",
+  //   env.OPTIMISM_GOERLI_RPC_URL!
+  // );
+  const { auctionHouse } = getMainnetSdk(mainnetProvider);
+
+  const { nomoToken, nomoSeeder } =
+    env.CHAIN_ID === "420" ?
+      getOptimisticGoerliSdk(optimismProvider) :
+      getOptimismSdk(optimismProvider);
+
+  console.log("startNewMatchnomoToken", nomoToken.address);
+  console.log("startNewMatchauctionHouse", auctionHouse.address);
+
   const [prevAuctionNounId, , prevAuctionStartTime, prevAuctionEndTime] =
     await auctionHouse.auction({
       blockTag: settlementBlockNumber - 1,
@@ -121,27 +167,47 @@ const startNewMatch = async (
       Math.max(maxBlocksBetweenAuctions, MIN_AMOUNT_CANDIDATES),
     settlementBlockNumber - 1
   );
+  // testing to set seed nounId to current match nounId not current auction nounId
+  // const seedNounId = prevMatch?.nounId ?? currentAuction.nounId;
+  console.log(
+    `for this nounId ${currentAuction.nounId}`
+  );
 
+ console.log("nomo seeder address", nomoSeeder.address);
+  optimismProvider.getNetwork().then((network) => {
+    console.log("optimism network", network);
+  });
   const preSettlementBlocks = await Promise.all(
-    candidateBlockNumbers.map((blockNumber) =>
-      Promise.all([
-        provider.getBlock(blockNumber).then((block) => ({
+    candidateBlockNumbers.map(async (blockNumber) => {
+      const [block, seedHash] = await Promise.all([
+        mainnetProvider.getBlock(blockNumber).then((block) => ({
           number: blockNumber,
           hash: block.hash,
           timestamp: block.timestamp,
         })),
-        nomoSeeder.generateSeed(
-          currentAuction.nounId,
-          blockNumber,
-          env.NOMO_DESCRIPTOR_ADDRESS!
-        ),
-      ]).then(([block, { accessory, background, body, glasses, head }]) => ({
+        mainnetProvider.getBlock(blockNumber).then((block) => block.hash),
+      ]);
+
+      const seed = await nomoSeeder.generateSeed(
+        currentAuction.nounId,
+        seedHash,
+        env.NOMO_DESCRIPTOR_ADDRESS!
+      );
+
+      return {
         ...block,
-        seed: { accessory, background, body, glasses, head },
-      }))
-    )
+        seed: {
+          accessory: seed.accessory,
+          background: seed.background,
+          body: seed.body,
+          glasses: seed.glasses,
+          head: seed.head,
+        },
+      };
+    })
   );
 
+  // console.log(`for this nounId ${currentAuction.nounId}, these are the preSettlementBlocks, ${preSettlementBlocks}`);
   const fomoBlocks = preSettlementBlocks.filter(
     (block) => block.timestamp > prevAuction.endTime
   );
@@ -183,44 +249,70 @@ const extendCurrentMatch = async (currentAuction: AuctionData) => {
 };
 
 export const signForMint = functions
-  .runWith({ secrets: ["SIGNER_PRIVATE_KEY"] })
-  .https.onCall(async ({ nounId, blockNumber }) => {
-    const matchData = await database
-      .ref("currentMatch")
-      .get()
-      .then((m) => m.val());
-    const match = getMatch(matchData);
-
-    if (match.status !== "Selling") {
-      throw new functions.https.HttpsError(
-        "failed-precondition",
-        "Nomo sale is not open"
+  .runWith({ secrets: ["SIGNER_PRIVATE_KEY", "JSON_RPC_URL"] })
+  .https.onCall(
+    async ({
+      nounId,
+      blocknumberHash,
+      auctionStartTimestamp,
+      auctionEndTimestamp,
+    }) => {
+      const matchData = await database
+        .ref("currentMatch")
+        .get()
+        .then((m) => m.val());
+      const match = getMatch(matchData);
+      const provider = new ethers.providers.JsonRpcProvider(
+        env.JSON_RPC_URL!,
+        ethers.providers.getNetwork("mainnet")
       );
+
+      if (match.status !== "Selling") {
+        throw new functions.https.HttpsError(
+          "failed-precondition",
+          "Nomo sale is not open"
+        );
+      }
+      const {
+        nounId: matchNounId,
+        electedNomoTally: {
+          block: {
+            number: electedBlockNumber,
+            //  hash: electedBlockHash
+          },
+        },
+      } = match;
+      const electedBlockHash = await provider
+        .getBlock(electedBlockNumber)
+        .then((block) => (blocknumberHash = block.hash));
+      if (nounId !== matchNounId || blocknumberHash !== electedBlockHash) {
+        throw new functions.https.HttpsError(
+          "invalid-argument",
+          "This is not the elected Nomo",
+          { nounId, matchNounId, blocknumberHash, electedBlockNumber }
+        );
+      }
+
+      // signing EIP-712
+      const signer = new ethers.Wallet(env.SIGNER_PRIVATE_KEY!);
+
+      console.log(signer.address);
+      console.log("electedBlockHash", electedBlockHash);
+      console.log("electedBlockNumber", electedBlockNumber);
+      console.log("domain", domain);
+      console.log("types", types);
+      console.log("nounId", nounId);
+      console.log("blocknumberHash", blocknumberHash);
+      console.log("auctionStartTimestamp", auctionStartTimestamp);
+      console.log("auctionEndTimestamp", auctionEndTimestamp);
+      return signer._signTypedData(domain, types, {
+        nounsId: nounId,
+        blocknumberHash: blocknumberHash,
+        auctionStartTimestamp: auctionStartTimestamp,
+        auctionEndTimestamp: auctionEndTimestamp,
+      });
     }
-
-    const {
-      nounId: matchNounId,
-      electedNomoTally: {
-        block: { number: electedBlockNumber },
-      },
-    } = match;
-
-    if (nounId !== matchNounId || blockNumber !== electedBlockNumber) {
-      throw new functions.https.HttpsError(
-        "invalid-argument",
-        "This is not the elected Nomo",
-        { nounId, matchNounId, blockNumber, electedBlockNumber }
-      );
-    }
-
-    // signing EIP-712
-    const signer = new ethers.Wallet(env.SIGNER_PRIVATE_KEY!);
-
-    return signer._signTypedData(domain, types, {
-      nounsId: nounId,
-      blockNumber: blockNumber,
-    });
-  });
+  );
 
 export const vote = functions.https.onCall(async (props) => {
   // Used for warming up some instances before the match starts
