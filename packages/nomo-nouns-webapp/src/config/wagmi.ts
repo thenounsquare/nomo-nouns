@@ -1,4 +1,5 @@
-import { chain, configureChains, createClient } from "wagmi";
+import { configureChains, createClient } from "wagmi";
+import { optimismGoerli, optimism } from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
@@ -7,7 +8,7 @@ import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
 
 export const getClient = () => {
   const { chains, provider, webSocketProvider } = configureChains(
-    [import.meta.env.DEV ? chain.optimismGoerli : chain.optimism],
+    [import.meta.env.DEV ? optimismGoerli : optimism],
     [
       alchemyProvider({
         apiKey: import.meta.env.VITE_ALCHEMY_APP_KEY,
@@ -32,7 +33,8 @@ export const getClient = () => {
       new WalletConnectConnector({
         chains,
         options: {
-          qrcode: false,
+          projectId: import.meta.env.WALLET_CONNECT_PROJECT_ID,
+          showQrModal: false,
         },
       }),
     ],
