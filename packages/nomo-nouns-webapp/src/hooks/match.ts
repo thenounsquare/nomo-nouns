@@ -171,7 +171,8 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
       block: { hash: blockNumberHash },
     },
   } = match;
-
+    console.log('nounId on front-end',nounId);
+    console.log('blockNumberHash on front-end',blockNumberHash);
   const { data: mintSignature } = useQuery(
     ["mintSignature", nounId, blockNumberHash],
     () =>

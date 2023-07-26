@@ -104,7 +104,8 @@ export const onAuctionCreated = functions
           currentMatch,
           currentAuction,
           settlementBlockNumber,
-          optimismProvider
+          optimismProvider,
+          provider
         );
       } else {
         await extendCurrentMatch(currentAuction);
@@ -121,12 +122,13 @@ const startNewMatch = async (
   prevMatch: MatchData | null,
   currentAuction: AuctionData,
   settlementBlockNumber: number,
-  optimismProvider: Provider
+  optimismProvider: Provider,
+  mainnetProvider: Provider
 ) => {
-  const mainnetProvider = new ethers.providers.JsonRpcBatchProvider(
-    env.MAINNET_RPC_URL!,
-    ethers.providers.getNetwork("mainnet")
-  );
+  // const mainnetProvider = new ethers.providers.JsonRpcBatchProvider(
+  //   env.MAINNET_RPC_URL!,
+  //   ethers.providers.getNetwork("mainnet")
+  // );
   // const optimismProvider = new ethers.providers.AlchemyProvider(
   //   "optimism-goerli",
   //   env.OPTIMISM_GOERLI_RPC_URL!
@@ -166,9 +168,9 @@ const startNewMatch = async (
     settlementBlockNumber - 1
   );
   // testing to set seed nounId to current match nounId not current auction nounId
-  const seedNounId = prevMatch?.nounId ?? currentAuction.nounId;
+  // const seedNounId = prevMatch?.nounId ?? currentAuction.nounId;
   console.log(
-    `for this nounId ${currentAuction.nounId}, this is the prevMatch nounId ${prevMatch?.nounId} and this is the seed nounId being used ${seedNounId}`
+    `for this nounId ${currentAuction.nounId}`
   );
 
  console.log("nomo seeder address", nomoSeeder.address);
@@ -247,7 +249,7 @@ const extendCurrentMatch = async (currentAuction: AuctionData) => {
 };
 
 export const signForMint = functions
-  .runWith({ secrets: ["SIGNER_PRIVATE_KEY"] })
+  .runWith({ secrets: ["SIGNER_PRIVATE_KEY", "JSON_RPC_URL"] })
   .https.onCall(
     async ({
       nounId,
@@ -261,7 +263,7 @@ export const signForMint = functions
         .then((m) => m.val());
       const match = getMatch(matchData);
       const provider = new ethers.providers.JsonRpcProvider(
-        process.env.MAINNET_RPC_URL!,
+        env.JSON_RPC_URL!,
         ethers.providers.getNetwork("mainnet")
       );
 
