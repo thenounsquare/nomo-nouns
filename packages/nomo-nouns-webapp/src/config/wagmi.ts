@@ -31,7 +31,10 @@ export const getClient = () => {
       new WalletConnectConnector({
         chains,
         options: {
-          qrcode: false,
+          projectId: 
+          //import.meta.env.WALLET_CONNECT_PROJECT_ID
+          'bc64bb864de80cda3fcd61337a9cfcf6',
+          showQrModal: false,
         },
       }),
     ],
