@@ -65,15 +65,7 @@ export const useStartNextMatch = () => {
         mintingIncreaseInterval,
         mintingPriceIncreasePerInterval,
       } = currentMatch;
-      candidateBlocks.forEach((candidate) => {
-        console.log(
-          `this is one of the candidates on the front-end when calling start new match: \n currentMatch: ${
-            currentMatch.nounId + 1
-          } \n current hash  ${candidate.hash}, \ncandidate number: ${
-            candidate.number
-          }, \n candidate seed: ${candidate.seed}`
-        );
-      });
+     
       const now = currentTimestamp();
       push(pastMatchesRef, currentMatch);
       // here it increases the nounId by 1
@@ -205,10 +197,6 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
   const mintNomo = async (quantity: number) => {
     const mintPrice = getMintPrice(Math.floor(Date.now() / 1000), match);
     const { hash } = match.electedNomoTally.block;
-    console.log(
-      `this is the elected nomo on the front-end \n \n nounId: ${nounId},\n blockNumberHash: ${blockNumberHash},\n auctionStartTimestamp: ${match.startTime}, \n auctionEndTimestamp: ${match.endTime},\n mintSignature: ${mintSignature}`
-    );
-
     return nomoToken
       .mint(
         nounId,
