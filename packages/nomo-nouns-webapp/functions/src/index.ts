@@ -77,7 +77,7 @@ export const onAuctionCreated = functions
     );
     // attempt to grab and save currentMatch variable
     try {
-      const [nounId, startTime, endTime] = await auctionHouse.auction({
+      const [nounId, , startTime, endTime] = await auctionHouse.auction({
         blockTag: settlementBlockNumber,
       });
       console.log("nounId, startTime, endTime", nounId, startTime, endTime);
@@ -93,6 +93,8 @@ export const onAuctionCreated = functions
         .then((s) => s.val());
 
       console.log("After Current Match");
+      console.log("currentMatch", currentMatch === null? "null" : currentMatch.nounId);
+      console.log("currentAuction", currentAuction);
 
       if (
         currentMatch === null ||
@@ -102,14 +104,8 @@ export const onAuctionCreated = functions
           currentMatch,
           currentAuction,
           settlementBlockNumber,
-          optimismProvider
-        );
-
-        console.log(
-          "settlementBlockNumber",
-          settlementBlockNumber,
-          "currentAuction",
-          currentAuction.nounId
+          optimismProvider,
+          provider
         );
       } else {
         await extendCurrentMatch(currentAuction);
@@ -126,12 +122,13 @@ const startNewMatch = async (
   prevMatch: MatchData | null,
   currentAuction: AuctionData,
   settlementBlockNumber: number,
-  optimismProvider: Provider
+  optimismProvider: Provider,
+  mainnetProvider: Provider
 ) => {
-  const mainnetProvider = new ethers.providers.JsonRpcBatchProvider(
-    env.MAINNET_RPC_URL!,
-    ethers.providers.getNetwork("mainnet")
-  );
+  // const mainnetProvider = new ethers.providers.JsonRpcBatchProvider(
+  //   env.MAINNET_RPC_URL!,
+  //   ethers.providers.getNetwork("mainnet")
+  // );
   // const optimismProvider = new ethers.providers.AlchemyProvider(
   //   "optimism-goerli",
   //   env.OPTIMISM_GOERLI_RPC_URL!
@@ -171,30 +168,45 @@ const startNewMatch = async (
     settlementBlockNumber - 1
   );
   // testing to set seed nounId to current match nounId not current auction nounId
-  const seedNounId = prevMatch?.nounId ?? currentAuction.nounId;
+  // const seedNounId = prevMatch?.nounId ?? currentAuction.nounId;
   console.log(
-    `for this nounId ${currentAuction.nounId}, this is the prevMatch nounId ${prevMatch?.nounId} and this is the seed nounId being used ${seedNounId}`
+    `for this nounId ${currentAuction.nounId}`
   );
-  //
+
+ console.log("nomo seeder address", nomoSeeder.address);
+  optimismProvider.getNetwork().then((network) => {
+    console.log("optimism network", network);
+  });
   const preSettlementBlocks = await Promise.all(
-    candidateBlockNumbers.map((blockNumber) =>
-      Promise.all([
+    candidateBlockNumbers.map(async (blockNumber) => {
+      const [block, seedHash] = await Promise.all([
         mainnetProvider.getBlock(blockNumber).then((block) => ({
           number: blockNumber,
           hash: block.hash,
           timestamp: block.timestamp,
         })),
-        nomoSeeder.generateSeed(
-          currentAuction.nounId,
-          mainnetProvider.getBlock(blockNumber).then((block) => block.hash),
-          env.NOMO_DESCRIPTOR_ADDRESS!
-        ),
-      ]).then(([block, { accessory, background, body, glasses, head }]) => ({
+        mainnetProvider.getBlock(blockNumber).then((block) => block.hash),
+      ]);
+
+      const seed = await nomoSeeder.generateSeed(
+        currentAuction.nounId,
+        seedHash,
+        env.NOMO_DESCRIPTOR_ADDRESS!
+      );
+
+      return {
         ...block,
-        seed: { accessory, background, body, glasses, head },
-      }))
-    )
+        seed: {
+          accessory: seed.accessory,
+          background: seed.background,
+          body: seed.body,
+          glasses: seed.glasses,
+          head: seed.head,
+        },
+      };
+    })
   );
+
   // console.log(`for this nounId ${currentAuction.nounId}, these are the preSettlementBlocks, ${preSettlementBlocks}`);
   const fomoBlocks = preSettlementBlocks.filter(
     (block) => block.timestamp > prevAuction.endTime
@@ -237,7 +249,7 @@ const extendCurrentMatch = async (currentAuction: AuctionData) => {
 };
 
 export const signForMint = functions
-  .runWith({ secrets: ["SIGNER_PRIVATE_KEY"] })
+  .runWith({ secrets: ["SIGNER_PRIVATE_KEY", "JSON_RPC_URL"] })
   .https.onCall(
     async ({
       nounId,
@@ -251,7 +263,7 @@ export const signForMint = functions
         .then((m) => m.val());
       const match = getMatch(matchData);
       const provider = new ethers.providers.JsonRpcProvider(
-        process.env.MAINNET_RPC_URL!,
+        env.JSON_RPC_URL!,
         ethers.providers.getNetwork("mainnet")
       );
 

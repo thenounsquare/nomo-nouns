@@ -23,6 +23,7 @@ import {
   VStack,
   chakra,
   SimpleGrid,
+  Link
 } from "@chakra-ui/react";
 import { NomoCard } from "../NomoCard";
 import { PreviousNomos } from "./PreviousNomos";
@@ -111,6 +112,9 @@ export const SellingPhase: FC<SellingPhaseProps> = ({ match }) => {
           {isDisconnected ? "Connect to start next match" : "Start next match"}
         </Button>
       )}
+      <Text fontSize={"lg"} fontWeight={"bold"}>👉
+        <Link href={"https://app.optimism.io/bridge/deposit"}  color="tomato" isExternal> Move ETH to OP using the Optimism Bridge</Link>
+      </Text>
 
       <PreviousNomos />
     </VStack>

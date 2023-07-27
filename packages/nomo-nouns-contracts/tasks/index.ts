@@ -5,3 +5,4 @@ import "./deploy-token";
 import "./deploy-descriptor";
 import "./deploy-nft-descriptor";
 import "./sign-mint";
+import "./update-nouns-art";

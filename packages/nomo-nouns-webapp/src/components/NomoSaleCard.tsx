@@ -51,7 +51,7 @@ export const NomoSaleCard: FC<NomoSaleCardProps> = ({ match, ...props }) => {
         (timeElapsedFromStart % match.mintingIncreaseInterval);
   const priceIncreaseCountdown = formatCountdown(secondsToNextPriceIncrease);
 
-  const { data: balance } = useBalance({ addressOrName: address });
+  const { data: balance } = useBalance({ address: address });
   const [mintQuantity, setMintQuantity] = useState(1);
   const { canMint, mintNomo } = useMintNomo(match);
   const onMint =
