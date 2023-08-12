@@ -173,13 +173,10 @@ const startNewMatch = async (
     `for this nounId ${currentAuction.nounId}`
   );
 
- console.log("nomo seeder address", nomoSeeder.address);
-  optimismProvider.getNetwork().then((network) => {
-    console.log("optimism network", network);
-  });
+ 
   const preSettlementBlocks = await Promise.all(
     candidateBlockNumbers.map(async (blockNumber) => {
-      const [block, seedHash] = await Promise.all([
+      const [block] = await Promise.all([
         mainnetProvider.getBlock(blockNumber).then((block) => ({
           number: blockNumber,
           hash: block.hash,
@@ -190,7 +187,7 @@ const startNewMatch = async (
 
       const seed = await nomoSeeder.generateSeed(
         currentAuction.nounId,
-        seedHash,
+        block.hash,
         env.NOMO_DESCRIPTOR_ADDRESS!
       );
 
@@ -207,7 +204,6 @@ const startNewMatch = async (
     })
   );
 
-  // console.log(`for this nounId ${currentAuction.nounId}, these are the preSettlementBlocks, ${preSettlementBlocks}`);
   const fomoBlocks = preSettlementBlocks.filter(
     (block) => block.timestamp > prevAuction.endTime
   );
