@@ -173,7 +173,7 @@ const startNewMatch = async (
     `for this nounId ${currentAuction.nounId}`
   );
 
- 
+
   const preSettlementBlocks = await Promise.all(
     candidateBlockNumbers.map(async (blockNumber) => {
       const [block] = await Promise.all([
