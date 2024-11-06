@@ -7,7 +7,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 // import { ImageData } from "@nouns/assets";
-import { ImageData } from "nouns-assets-package"; // internalised package instead of npm
+import { ImageData } from "@nomonouns/assets";
 import party, { Vector } from "party-js";
 import { FC, useEffect, useMemo, useRef } from "react";
 import {
