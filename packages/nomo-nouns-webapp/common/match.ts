@@ -1,6 +1,7 @@
 import { orderBy, times } from "lodash";
 import { BigNumber } from "ethers";
-import { NounSeed } from "@nouns/assets/dist/types";
+// import { NounSeed } from "@nouns/assets/dist/types";
+import { NounSeed } from "nouns-assets-package/types"; // internalised package instead of npm
 
 export const MAX_CLICKS_PER_SECOND = 16;
 

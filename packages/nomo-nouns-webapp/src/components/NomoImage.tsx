@@ -1,6 +1,8 @@
-import { NounSeed } from "@nouns/assets/dist/types";
+// import { NounSeed } from "@nouns/assets/dist/types";
+import { NounSeed } from "nouns-assets-package/types"; // internalised package instead of npm
 import { useMemo } from "react";
-import { getNounData, ImageData } from "@nouns/assets";
+// import { getNounData, ImageData } from "@nouns/assets";
+import { getNounData, ImageData } from "nouns-assets-package"; // internalised package instead of npm
 import { buildSVG } from "@nouns/sdk";
 
 const { palette } = ImageData;
