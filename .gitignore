@@ -7,3 +7,4 @@ node_modules/
 .DS_Store
 packages/nomo-nouns-webapp/.env
 yarn.lock
+.nvmrc
