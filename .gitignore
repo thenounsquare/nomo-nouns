@@ -1,10 +1,22 @@
+# Dependency directories
 node_modules/
-.env.local
 
+# Environment variables
+.env.local
+packages/nomo-nouns-webapp/.env
+
+# IDE and system files
 .idea
+.DS_Store
+
+# Build and deployment
 .vercel
 
-.DS_Store
-packages/nomo-nouns-webapp/.env
-yarn.lock
+# Yarn-related files
+yarn-error.log
+
+# Vite cache (optional, specify for more control)
+node_modules/.cache/vite
+
+# Node Version Manager (optional, useful if you want to lock Node.js version)
 .nvmrc
