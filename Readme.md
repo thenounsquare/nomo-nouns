@@ -7,24 +7,23 @@ This repository houses the NOMO Nouns project, including the **nomo-nouns-webapp
 To initialize the environment, install all dependencies by running:
 
 ```bash
-yarn install
+yarn
 ```
 
 ## Cleanup Commands
 
 If you encounter issues or need to reset the environment, you can clean up with the following commands:
 
-1. **Remove `node_modules`**:
+1. **Remove `node_modules`** (both in the root and all packages):
 
    ```bash
-   rm -rf node_modules
-   yarn install
+   find . -name "node_modules" -type d -exec rm -rf {} +
    ```
 
-2. **Clear Vite Cache**:
+2. **Clear Only Vite Cache Files** (in all package `node_modules` directories):
 
    ```bash
-   rm -rf node_modules/.cache/vite
+   find . -path "*/node_modules/.cache/vite" -type d -exec rm -rf {} +
    ```
 
 3. **Clear Yarn Cache**:
