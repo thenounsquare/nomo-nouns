@@ -9,7 +9,8 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { NounSeed } from "@nouns/assets/dist/types";
+// import { NounSeed } from "@nouns/assets/dist/types";
+import { NounSeed } from "@nomonouns/assets/dist/types";
 import { useNomoImage } from "./NomoImage";
 import { FC, useEffect, useState } from "react";
 

@@ -1,6 +1,8 @@
-import { NounSeed } from "@nouns/assets/dist/types";
+// import { NounSeed } from "@nouns/assets/dist/types";
+import { NounSeed } from "@nomonouns/assets/dist/types";
 import { useMemo } from "react";
-import { getNounData, ImageData } from "@nouns/assets";
+// import { getNounData, ImageData } from "@nouns/assets";
+import { getNounData, ImageData } from "@nomonouns/assets";
 import { buildSVG } from "@nouns/sdk";
 
 const { palette } = ImageData;

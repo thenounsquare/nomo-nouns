@@ -7,13 +7,13 @@ export default defineConfig({
   appType: "spa",
   optimizeDeps: {
     esbuildOptions: {
-      target: "esnext", 
+      target: "esnext",
       // Node.js global to browser globalThis
       define: {
         global: 'globalThis'
       },
-      supported: { 
-        bigint: true 
+      supported: {
+        bigint: true
       },
     }
   },
