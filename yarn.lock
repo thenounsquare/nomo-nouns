@@ -3402,10 +3402,10 @@
     table "^6.8.0"
     undici "^5.14.0"
 
-"@nomonouns/assets@0.9.0":
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/@nomonouns/assets/-/assets-0.9.0.tgz#63993d9f9e7fef6ea61caa306ddbe96fa820127f"
-  integrity sha512-sZFax9jk3h1RvcI++/vl1okcw/pqZ8zJNoQqE0TqW59wie3XIpbkD00PItMp+W7hPZllmsNGjiAyKR3cSaK4Zw==
+"@nomonouns/assets@0.10.0":
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/@nomonouns/assets/-/assets-0.10.0.tgz#5ea27bf8346cce73234514fc087df51c434b4ac1"
+  integrity sha512-xtqabzuu3TjCXRaTZgEehJy0bLYAlgoRsB5cy/JdHTNFHOqzY8zFEPvSQIKF+JQnqTDYd4B1+ooEsLdaCSSzUQ==
   dependencies:
     "@ethersproject/bignumber" "^5.5.0"
     "@ethersproject/solidity" "^5.5.0"
