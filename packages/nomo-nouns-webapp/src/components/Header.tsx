@@ -10,7 +10,8 @@ import {
   useColorMode,
 } from "@chakra-ui/react";
 import Nomoggles from "../assets/nomoggles.svg";
-import { HiUser, HiUsers, MdMusicNote, MdMusicOff } from "react-icons/all";
+import { HiUser, HiUsers } from "react-icons/hi";
+import { MdMusicNote, MdMusicOff } from "react-icons/md";
 import { ConnectKitButton } from "connectkit";
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 import { useAppState } from "../state/appState";
