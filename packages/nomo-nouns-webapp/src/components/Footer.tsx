@@ -1,10 +1,12 @@
 import { HStack, Image, Link, Text, Tooltip } from "@chakra-ui/react";
 import volky from "../assets/volky.png";
-import { FaDiscord, FaGithub, FaTwitter, HiUsers } from "react-icons/all";
+import { FaDiscord, FaGithub } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
+import { HiUsers } from "react-icons/hi";
 import { ConnectKitButton } from "connectkit";
 import { useActiveUserCount } from "../hooks/session";
 import { useIsMobile } from "../hooks/isMobile";
-import { EtherscanIcon, OpenSeaIcon } from "./Icons";
+import { EtherscanIcon, OptimismScanIcon, OpenSeaIcon, FarcasterIcon } from "./Icons";
 
 export const Footer = () => {
   const activeUserCount = useActiveUserCount();
@@ -29,25 +31,28 @@ export const Footer = () => {
         </Tooltip>
       )}
 
-      <HStack>
-        <Link isExternal href={"https://twitter.com/thenounsquare"}>
-          <FaTwitter size={24} />
+      <HStack spacing={3} align="center">
+        <Link isExternal href={"https://x.com/zerorightsmedia"}>
+          <FaXTwitter size={24} />
+        </Link>
+        <Link isExternal href={"https://warpcast.com/zerorightsmedia"}>
+          <FarcasterIcon boxSize="22px" />
         </Link>
         <Link isExternal href={"https://discord.gg/qanyJqydYt"}>
           <FaDiscord size={24} />
         </Link>
-        <Link isExternal href={"https://opensea.io/collection/nomo-nouns"}>
-          <OpenSeaIcon boxSize={"24px"} />
+        <Link isExternal href={"https://opensea.io/collection/nomo-nouns-2"}>
+          <OpenSeaIcon boxSize="24px" />
         </Link>
         <Link
           isExternal
           href={
-            "https://etherscan.io/address/0xbe37CC3F8f7E1E4C264Ba5818482fA75e2D1823e"
+            "https://optimistic.etherscan.io/token/0x1464ebbf9ecd642d42db8e8827919fdd4a786987"
           }
         >
-          <EtherscanIcon boxSize={"24px"} />
+          <OptimismScanIcon boxSize="24px" />
         </Link>
-        <Link isExternal href={"https://github.com/volkyeth/nomo-nouns"}>
+        <Link isExternal href={"https://github.com/thenounsquare/nomo-nouns"}>
           <FaGithub size={24} />
         </Link>
         <Tooltip hasArrow label={"by Volky"}>
