@@ -1,6 +1,6 @@
-import { HStack, Image, Link, Text, Tooltip } from "@chakra-ui/react";
+import { HStack, Image, Link, Text, Tooltip, Box } from "@chakra-ui/react";
 import volky from "../assets/volky.png";
-import { FaDiscord, FaGithub } from "react-icons/fa";
+import { FaDiscord, FaGithub, FaTwitter } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { HiUsers } from "react-icons/hi";
 import { ConnectKitButton } from "connectkit";
@@ -11,6 +11,28 @@ import { EtherscanIcon, OptimismScanIcon, OpenSeaIcon, FarcasterIcon } from "./I
 export const Footer = () => {
   const activeUserCount = useActiveUserCount();
   const isMobile = useIsMobile();
+  const TwitterXIcon = () => {
+    return (
+      <Box position="relative" w="22px" h="24px">
+        <Box
+          position="absolute"
+          opacity={1}
+          _groupHover={{ opacity: 0 }}
+          transition="opacity 0.2s"
+        >
+          <FaXTwitter size={24} />
+        </Box>
+        <Box
+          position="absolute"
+          opacity={0}
+          _groupHover={{ opacity: 1 }}
+          transition="opacity 0.2s"
+        >
+          <FaTwitter size={22} />
+        </Box>
+      </Box>
+    );
+  };
 
   return (
     <HStack
@@ -32,8 +54,11 @@ export const Footer = () => {
       )}
 
       <HStack spacing={3} align="center">
-        <Link isExternal href={"https://x.com/zerorightsmedia"}>
+        {/* <Link isExternal href={"https://x.com/zerorightsmedia"}>
           <FaXTwitter size={24} />
+        </Link> */}
+        <Link isExternal href={"https://x.com/zerorightsmedia"} role="group">
+          <TwitterXIcon />
         </Link>
         <Link isExternal href={"https://warpcast.com/zerorightsmedia"}>
           <FarcasterIcon boxSize="22px" />
