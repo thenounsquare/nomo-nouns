@@ -101,7 +101,7 @@ export const SellingPhase: FC<SellingPhaseProps> = ({ match }) => {
           w={"full"}
           h={"520px"}
           src={
-            saleOver ? "https://fomonouns.wtf/" : "https://www.nounswap.wtf/"
+            saleOver ? "https://fomonouns.wtf/" : "https://www.nounoclock.app/"
           }
         />
         <NomoSaleCard gridArea={"nomo"} h={"520px"} w={"full"} match={match} />
