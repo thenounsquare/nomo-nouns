@@ -31,6 +31,7 @@ import { formatCountdown } from "../utils/formatCountdown";
 import { useMintNomo, useStartNextMatch } from "../hooks/match";
 import { BigNumber } from "ethers";
 import { NomoSaleCard } from "./NomoSaleCard";
+import { NextNounPreview } from './NextNounPreview';
 
 export type SellingPhaseProps = {
   match: SellingMatch | FinishedMatch;
@@ -113,8 +114,12 @@ export const SellingPhase: FC<SellingPhaseProps> = ({ match }) => {
         </Button>
       )}
       <Text fontSize={"lg"} fontWeight={"bold"}>👉
-        <Link href={"https://app.optimism.io/bridge/deposit"}  color="tomato" isExternal> Move ETH to OP using the Optimism Bridge</Link>
+        <Link href={"https://app.optimism.io/bridge/deposit"} color="tomato" isExternal>
+          Move ETH to OP using the Optimism Bridge
+        </Link>
       </Text>
+
+      <NextNounPreview />
 
       <PreviousNomos />
     </VStack>
