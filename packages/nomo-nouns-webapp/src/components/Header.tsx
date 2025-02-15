@@ -4,7 +4,6 @@ import {
   HStack,
   IconButton,
   Image,
-  keyframes,
   Text,
   Tooltip,
   useColorMode,
@@ -18,6 +17,7 @@ import { useAppState } from "../state/appState";
 import { useActiveUserCount } from "../hooks/session";
 import { useEffect, useState } from "react";
 import { useIsMobile } from "../hooks/isMobile";
+import { keyframes } from '@emotion/react';
 
 export const Header = () => {
   const { soundEnabled, toggleSound } = useAppState();
