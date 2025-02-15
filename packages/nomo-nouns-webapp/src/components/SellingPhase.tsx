@@ -120,6 +120,10 @@ export const SellingPhase: FC<SellingPhaseProps> = ({ match }) => {
       </Text>
 
       <NextNounPreview />
+      {/* Test usage examples:
+      // <NextNounPreview testNounId={9} showSettleButton={true} /> // Test with button
+      // <NextNounPreview testNounId={19} /> // Test without button
+      // <NextNounPreview /> // Production behavior  */}
 
       <PreviousNomos />
     </VStack>

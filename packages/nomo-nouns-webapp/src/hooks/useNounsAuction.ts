@@ -1,73 +1,138 @@
-import { useContractRead, useContractWrite, usePrepareContractWrite } from 'wagmi';
-import { mainnet } from 'wagmi/chains';
-import { useNetwork } from 'wagmi';
+import { useEffect, useState } from 'react';
+import { createPublicClient, http, createWalletClient, custom } from 'viem';
+import { mainnet } from 'viem/chains';
+import { getDatabase, ref, onValue } from 'firebase/database';
+import { useToast } from '@chakra-ui/react';
+import { useAccount } from 'wagmi';
 
 const NOUNS_AUCTION_ABI = [
   {
-    name: 'auction',
-    type: 'function',
-    stateMutability: 'view',
-    inputs: [],
-    outputs: [
-      { name: 'nounId', type: 'uint256' },
-      { name: 'amount', type: 'uint256' },
-      { name: 'startTime', type: 'uint256' },
-      { name: 'endTime', type: 'uint256' },
-      { name: 'bidder', type: 'address' },
-      { name: 'settled', type: 'bool' }
-    ]
-  },
-  {
-    name: 'settle',
+    name: 'settleCurrentAndCreateNewAuction',
     type: 'function',
     stateMutability: 'nonpayable',
     inputs: [],
     outputs: []
+  },
+  {
+    name: 'paused',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ type: 'bool' }]
   }
 ] as const;
 
 const NOUNS_AUCTION_ADDRESS = '0x830BD73E4184ceF73443C15111a1DF14e495C706';
 
-interface AuctionData {
-  nounId: bigint;
-  amount: bigint;
-  startTime: bigint;
-  endTime: bigint;
-  bidder: string;
-  settled: boolean;
-}
+// Create a dedicated mainnet client
+const mainnetClient = createPublicClient({
+  chain: mainnet,
+  transport: http('https://eth-mainnet.g.alchemy.com/v2/LjGiGtmIeZS9R1we1bibphWLlLLv8ZOX')
+});
 
 export const useNounsAuction = () => {
-  const { data: auctionData, isError: isReadError } = useContractRead({
-    address: NOUNS_AUCTION_ADDRESS,
-    abi: NOUNS_AUCTION_ABI,
-    functionName: 'auction',
-    chainId: mainnet.id,
-    onError: (error) => {
-      console.error('Auction read error:', error);
-    },
-    onSuccess: (data) => {
-      console.log('Auction data:', data);
-    },
+  const { address } = useAccount();
+  const toast = useToast();
+  const [auctionState, setAuctionState] = useState<{
+    currentNounId?: number;
+    isAuctionSettled: boolean;
+    endTime?: number;
+  }>({
+    isAuctionSettled: false
   });
 
-  const { config } = usePrepareContractWrite({
-    address: NOUNS_AUCTION_ADDRESS,
-    abi: NOUNS_AUCTION_ABI,
-    functionName: 'settle',
-    chainId: mainnet.id, // Always use mainnet
-  });
+  useEffect(() => {
+    const database = getDatabase();
+    const currentMatchRef = ref(database, 'currentMatch');
+    
+    return onValue(currentMatchRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setAuctionState({
+          currentNounId: data.nounId,
+          endTime: data.endTime,
+          isAuctionSettled: Boolean(data.settled)
+        });
+      }
+    });
+  }, []);
 
-  const { write: settle, isLoading: isSettling } = useContractWrite({
-    ...config,
-    chainId: mainnet.id, // Always use mainnet
-  });
+  const settle = async () => {
+    if (!address || !window.ethereum) {
+      toast({
+        title: 'Wallet Not Connected',
+        description: 'Please connect your wallet to settle the Nouns auction',
+        status: 'error',
+      });
+      return;
+    }
+
+    try {
+      const isPaused = await mainnetClient.readContract({
+        address: NOUNS_AUCTION_ADDRESS,
+        abi: NOUNS_AUCTION_ABI,
+        functionName: 'paused',
+      });
+
+      if (!isPaused) {
+        toast({
+          title: 'Settlement Error',
+          description: 'Waiting for auction to complete.\nPlease try again at the end of the current auction.',
+          status: 'error',
+          isClosable: true,
+          position: 'bottom',
+          containerStyle: {
+            whiteSpace: 'pre-line'
+          }
+        });
+        return;
+      }
+
+      const walletClient = await createWalletClient({
+        chain: mainnet,
+        transport: custom(window.ethereum)
+      });
+
+      const { request } = await mainnetClient.simulateContract({
+        address: NOUNS_AUCTION_ADDRESS,
+        abi: NOUNS_AUCTION_ABI,
+        functionName: 'settleCurrentAndCreateNewAuction',
+        account: address,
+      });
+
+      const hash = await walletClient.writeContract(request);
+
+      toast({
+        title: 'Settlement Submitted',
+        description: `Transaction Sent`,
+        status: 'success',
+      });
+    } catch (error) {
+      console.error('Settlement error:', error);
+      
+      let errorMessage = 'Unable to settle auction at this time.';
+      if (error instanceof Error) {
+        if (error.message.includes('not paused')) {
+          errorMessage = 'Current auction must be finished to settle auction.';
+        } else if (error.message.includes('insufficient funds')) {
+          errorMessage = 'Insufficient ETH to cover gas fees.';
+        } else if (error.message.includes('already been settled')) {
+          errorMessage = 'This auction has already been settled.';
+        }
+      }
+
+      toast({
+        title: 'Settlement Error',
+        description: errorMessage,
+        status: 'error',
+        duration: 5000,
+      });
+    }
+  };
 
   return {
-    currentNounId: auctionData?.nounId ? Number(auctionData.nounId) : undefined,
-    isAuctionSettled: auctionData?.settled,
+    ...auctionState,
     settle,
-    isSettling,
-    isReadError,
+    isSettling: false,
   };
 }; 
