@@ -33,7 +33,7 @@ export const PreviousNomos = () => {
     <>
       {previousMatches && previousMatches.length > 0 && (
         <VStack py={6} w={"full"} borderTopWidth={1} justifyContent={"center"}>
-          <Heading>Previous Nomos</Heading>
+          <Heading mb={4}>Previous Nomos</Heading>
           <HStack
             px={6}
             overflowX={"scroll"}

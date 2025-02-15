@@ -1,10 +1,11 @@
-import { Center, keyframes, VStack } from "@chakra-ui/react";
+import { Center, VStack } from "@chakra-ui/react";
 import { MatchSection } from "./components/MatchSection";
 import { useIdleDetection } from "./hooks/session";
 import { Header } from "./components/Header";
 import { useIsMobile } from "./hooks/isMobile";
 import { Footer } from "./components/Footer";
 import { NomoLoading } from "./components/NomoLoading";
+import { keyframes } from '@emotion/react';
 
 function App() {
   const isIdle = useIdleDetection();

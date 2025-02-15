@@ -1,6 +1,7 @@
 import Nomoggles from "../assets/nomoggles.svg";
-import { Image, ImageProps, keyframes } from "@chakra-ui/react";
+import { Image, ImageProps } from "@chakra-ui/react";
 import { FC } from "react";
+import { keyframes } from '@emotion/react';
 
 export const NomoLoading: FC<Omit<ImageProps, "src">> = (props) => {
   return (

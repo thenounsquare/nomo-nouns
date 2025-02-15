@@ -1,11 +1,11 @@
 import {
   HStack,
   Image,
-  keyframes,
   StackProps,
   Text,
   VStack,
 } from "@chakra-ui/react";
+import { keyframes } from '@emotion/react';
 // import { ImageData } from "@nouns/assets";
 import { ImageData } from "@nomonouns/assets";
 import party, { Vector } from "party-js";
