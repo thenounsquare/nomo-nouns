@@ -81,63 +81,97 @@ export const NextNounPreview: FC<NextNounPreviewProps> = ({ testNounId }) => {
     };
   }, [latestBlockHash, nextNounIds, generateNounSvg]);
 
+  // Create a reusable frame component to maintain consistent layout
+  const NounFrame = ({ children }: { children: React.ReactNode }) => (
+    <VStack w="full" spacing={6}>
+      <Divider borderColor="gray.600" />
+      <Center w="full" bg="gray.800" borderRadius="xl" p={8}>
+        <VStack spacing={6} align="center" maxW="container.sm">
+          <Text fontSize="lg" fontWeight="bold" color="white">
+            Next Noun{nextNounIds.length > 1 ? 's' : ''} Preview
+          </Text>
+          <HStack spacing={6} align="start">
+            {nextNounIds.map((id) => (
+              <VStack key={id}>
+                <Text color="white" fontSize="lg">
+                  Noun {id}
+                  {id.toString().endsWith('0') ? ' (Nounders)' : ''}
+                </Text>
+                <Box 
+                  w="320px"
+                  position="relative"
+                  _before={{
+                    content: '""',
+                    display: 'block',
+                    paddingTop: '100%' // This creates a 1:1 aspect ratio
+                  }}
+                  bg="gray.900"
+                  borderRadius="xl"
+                  overflow="hidden"
+                  border="2px solid"
+                  borderColor="gray.700"
+                >
+                  <Center
+                    position="absolute"
+                    top="0"
+                    left="0"
+                    right="0"
+                    bottom="0"
+                  >
+                    {children}
+                  </Center>
+                </Box>
+              </VStack>
+            ))}
+          </HStack>
+        </VStack>
+      </Center>
+    </VStack>
+  );
+
   // Memoize the preview content
   const previewContent = useMemo(() => {
     if (loading) {
       return (
-        <Center w="full" h="320px" bg="gray.800" borderRadius="xl">
+        <NounFrame>
           <Text color="white">Generating preview...</Text>
-        </Center>
+        </NounFrame>
       );
     }
 
     if (error) {
       return (
-        <Center w="full" h="320px" bg="gray.800" borderRadius="xl">
+        <NounFrame>
           <Text color="white">Error: {error}</Text>
-        </Center>
+        </NounFrame>
       );
     }
 
     return (
-      <VStack w="full" spacing={6}>
-        <Divider borderColor="gray.600" />
-        <Center w="full" bg="gray.800" borderRadius="xl" p={8}>
-          <VStack spacing={6} align="center" maxW="container.sm">
-            <Text fontSize="lg" fontWeight="bold" color="white">
-              Next Noun{nounPreviews.length > 1 ? 's' : ''} Preview
-            </Text>
-            <HStack spacing={6} align="start">
-              {nounPreviews.map((preview) => (
-                <VStack key={preview.id}>
-                  <Text color="white" fontSize="lg">
-                    Noun {preview.id}
-                    {preview.id.endsWith('0') ? ' (Nounders)' : ''}
-                  </Text>
-                  <Box 
-                    w="full" 
-                    maxW="320px" 
-                    h="320px" 
-                    bg="gray.900"
-                    borderRadius="xl"
-                    overflow="hidden"
-                    border="2px solid"
-                    borderColor="gray.700"
-                  >
-                    <img 
-                      src={`data:image/svg+xml;base64,${preview.svg}`}
-                      alt={`Noun ${preview.id} Preview`}
-                      style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                    />
-                  </Box>
-                </VStack>
-              ))}
-            </HStack>
-          </VStack>
-        </Center>
-      </VStack>
+      <NounFrame>
+        {nounPreviews.map((preview) => (
+          <Box
+            key={preview.id}
+            position="absolute"
+            top="0"
+            left="0"
+            right="0"
+            bottom="0"
+          >
+            <img 
+              src={`data:image/svg+xml;base64,${preview.svg}`}
+              alt={`Noun ${preview.id} Preview`}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain'
+              }}
+            />
+          </Box>
+        ))}
+      </NounFrame>
     );
-  }, [loading, error, nounPreviews]);
+  }, [loading, error, nounPreviews, nextNounIds]);
 
   return previewContent;
 };
