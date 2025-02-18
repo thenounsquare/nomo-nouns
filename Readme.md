@@ -4,6 +4,13 @@ This repository houses the NOMO Nouns project, including the **nomo-nouns-webapp
 
 ## Setup Instructions
 
+This project requires Node.js version 18.17. If you use nvm, you can install and use the correct version with:
+
+```bash
+nvm install 18.17
+nvm use 18.17
+```
+
 To initialize the environment, install all dependencies by running:
 
 ```bash
