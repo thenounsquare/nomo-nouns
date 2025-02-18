@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createPublicClient, http, createWalletClient, custom } from 'viem';
-import { mainnet } from 'viem/chains';
+import { mainnet, optimism } from 'viem/chains';
 import { getDatabase, ref, onValue } from 'firebase/database';
 import { useToast } from '@chakra-ui/react';
 import { useAccount } from 'wagmi';
@@ -68,11 +68,27 @@ export const useNounsAuction = () => {
     }
 
     try {
-      // Proceed directly to settlement since we know the button only shows when appropriate
+      // Create a wallet client specifically for mainnet
       const walletClient = await createWalletClient({
         chain: mainnet,
         transport: custom(window.ethereum)
       });
+
+      // Store original chain to switch back later
+      const originalChainId = await walletClient.getChainId();
+
+      // First try to switch the network to mainnet
+      try {
+        await walletClient.switchChain({ id: mainnet.id });
+      } catch (switchError) {
+        toast({
+          title: 'Network Error',
+          description: 'Please switch your wallet to Ethereum Mainnet to settle the auction',
+          status: 'error',
+          duration: 5000,
+        });
+        return;
+      }
 
       const { request } = await mainnetClient.simulateContract({
         address: NOUNS_AUCTION_ADDRESS,
@@ -88,6 +104,16 @@ export const useNounsAuction = () => {
         description: `Transaction Sent`,
         status: 'success',
       });
+
+      // Switch back to original chain if it was Optimism
+      if (originalChainId === optimism.id) {
+        try {
+          await walletClient.switchChain({ id: optimism.id });
+        } catch (switchError) {
+          console.error('Failed to switch back to Optimism:', switchError);
+          // Don't show error toast here as the main action succeeded
+        }
+      }
     } catch (error) {
       console.error('Settlement error:', error);
       
@@ -99,6 +125,8 @@ export const useNounsAuction = () => {
           errorMessage = 'Insufficient ETH to cover gas fees.';
         } else if (error.message.includes('already been settled')) {
           errorMessage = 'This auction has already been settled.';
+        } else if (error.message.includes('network')) {
+          errorMessage = 'Please switch to Ethereum Mainnet to settle the auction.';
         }
       }
 
