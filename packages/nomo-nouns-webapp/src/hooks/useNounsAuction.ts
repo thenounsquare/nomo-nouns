@@ -68,26 +68,7 @@ export const useNounsAuction = () => {
     }
 
     try {
-      const isPaused = await mainnetClient.readContract({
-        address: NOUNS_AUCTION_ADDRESS,
-        abi: NOUNS_AUCTION_ABI,
-        functionName: 'paused',
-      });
-
-      if (!isPaused) {
-        toast({
-          title: 'Settlement Error',
-          description: 'Waiting for auction to complete.\nPlease try again at the end of the current auction.',
-          status: 'error',
-          isClosable: true,
-          position: 'bottom',
-          containerStyle: {
-            whiteSpace: 'pre-line'
-          }
-        });
-        return;
-      }
-
+      // Proceed directly to settlement since we know the button only shows when appropriate
       const walletClient = await createWalletClient({
         chain: mainnet,
         transport: custom(window.ethereum)
