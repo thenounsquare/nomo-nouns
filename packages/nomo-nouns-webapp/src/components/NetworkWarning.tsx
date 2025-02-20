@@ -18,8 +18,9 @@ export const NetworkWarning = () => {
         title: 'Network Switch',
         description: 'NOMO only works on Optimism. If you\'re trying to settle Nouns, we\'ll handle the network switching automatically.',
         status: 'info',
-        duration: 6000,
+        duration: 15000,  // 15 seconds
         isClosable: true,
+        position: 'top-right',
       });
     }
   }, [chain?.id]); // Run whenever chain changes
