@@ -158,12 +158,12 @@ export const NextNounPreview: FC<{
               position="absolute"
               bottom={1.5}
               left={1.5}
-              bg="blackAlpha.200"
+              bg="whiteAlpha.700"
               color="blackAlpha.900"
               fontSize={["2xs", "xs"]}
               px={1.5}
               py={0.5}
-              borderRadius="sm"
+              borderRadius="lg"
               zIndex={1}
             >
               Nounders
