@@ -138,8 +138,8 @@ export const NextNounPreview: FC<{
   const NounFrame = ({ preview, isLoading }: { preview?: NounPreview, isLoading?: boolean }) => (
     <Box w="full" maxW="320px" flex="1 1 0">
       <VStack spacing={4}>
-        <Text color="gray.800" _dark={{ color: 'white' }} fontSize="lg" minH="1.5em">
-          {isLoading ? "Loading..." : `Noun ${preview?.id}${preview?.id.endsWith('0') ? ' (Nounders)' : ''}`}
+        <Text color="gray.800" _dark={{ color: 'white' }} fontSize="lg">
+          {isLoading ? "Loading..." : `Noun ${preview?.id}`}
         </Text>
         <Box 
           w="full"
@@ -153,6 +153,22 @@ export const NextNounPreview: FC<{
           overflow="hidden"
           _dark={{ borderColor: 'gray.700' }}
         >
+          {!isLoading && preview?.id.endsWith('0') && (
+            <Box
+              position="absolute"
+              bottom={1.5}
+              left={1.5}
+              bg="blackAlpha.200"
+              color="blackAlpha.900"
+              fontSize={["2xs", "xs"]}
+              px={1.5}
+              py={0.5}
+              borderRadius="sm"
+              zIndex={1}
+            >
+              Nounders
+            </Box>
+          )}
           <Center
             position="absolute"
             top="0"
