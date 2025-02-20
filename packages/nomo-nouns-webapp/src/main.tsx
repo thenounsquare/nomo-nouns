@@ -17,6 +17,7 @@ import { ConnectKitProvider } from "connectkit";
 import { getClient } from "./config/wagmi";
 import LogRocket from "logrocket";
 import { Analytics } from "@vercel/analytics/react";
+import { NetworkWarning } from "./components/NetworkWarning";
 
 if (import.meta.env.PROD) {
   LogRocket.init("9adwg7/nomonouns");
@@ -58,6 +59,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         <ChakraProvider theme={theme}>
           <WagmiConfig client={client}>
             <ThemedConnectKitProvider>
+              <NetworkWarning />
               <App />
             </ThemedConnectKitProvider>
           </WagmiConfig>
