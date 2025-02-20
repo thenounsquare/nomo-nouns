@@ -136,9 +136,9 @@ export const NextNounPreview: FC<{
 
   // Frame component without the divider
   const NounFrame = ({ preview, isLoading }: { preview?: NounPreview, isLoading?: boolean }) => (
-    <Box w="full" maxW="320px">
+    <Box w="full" maxW="320px" flex="1 1 0">
       <VStack spacing={4}>
-        <Text color="gray.800" _dark={{ color: 'white' }} fontSize="lg">
+        <Text color="gray.800" _dark={{ color: 'white' }} fontSize="lg" minH="1.5em">
           {isLoading ? "Loading..." : `Noun ${preview?.id}${preview?.id.endsWith('0') ? ' (Nounders)' : ''}`}
         </Text>
         <Box 
@@ -191,6 +191,7 @@ export const NextNounPreview: FC<{
           spacing={6} 
           justify="center"
           align="start"
+          w="full"
         >
           {loading ? (
             nextNounIds.map(id => (
