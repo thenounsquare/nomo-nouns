@@ -67,27 +67,17 @@ export const useNounsAuction = () => {
       return;
     }
 
+    const walletClient = await createWalletClient({
+      chain: mainnet,
+      transport: custom(window.ethereum)
+    });
+
+    const currentChainId = await walletClient.getChainId();
+
     try {
-      // Create a wallet client specifically for mainnet
-      const walletClient = await createWalletClient({
-        chain: mainnet,
-        transport: custom(window.ethereum)
-      });
-
-      // Store original chain to switch back later
-      const originalChainId = await walletClient.getChainId();
-
-      // First try to switch the network to mainnet
-      try {
+      // Only switch to mainnet if we're not already there
+      if (currentChainId !== mainnet.id) {
         await walletClient.switchChain({ id: mainnet.id });
-      } catch (switchError) {
-        toast({
-          title: 'Network Error',
-          description: 'Please switch your wallet to Ethereum Mainnet to settle the auction',
-          status: 'error',
-          duration: 5000,
-        });
-        return;
       }
 
       const { request } = await mainnetClient.simulateContract({
@@ -101,19 +91,10 @@ export const useNounsAuction = () => {
 
       toast({
         title: 'Settlement Submitted',
-        description: `Transaction Sent`,
+        description: `Transaction Sent. Switching back to Optimism...`,
         status: 'success',
       });
 
-      // Switch back to original chain if it was Optimism
-      if (originalChainId === optimism.id) {
-        try {
-          await walletClient.switchChain({ id: optimism.id });
-        } catch (switchError) {
-          console.error('Failed to switch back to Optimism:', switchError);
-          // Don't show error toast here as the main action succeeded
-        }
-      }
     } catch (error) {
       console.error('Settlement error:', error);
       
@@ -125,8 +106,8 @@ export const useNounsAuction = () => {
           errorMessage = 'Insufficient ETH to cover gas fees.';
         } else if (error.message.includes('already been settled')) {
           errorMessage = 'This auction has already been settled.';
-        } else if (error.message.includes('network')) {
-          errorMessage = 'Please switch to Ethereum Mainnet to settle the auction.';
+        } else if (error.message.includes('rejected') || error.message.includes('denied')) {
+          errorMessage = 'Transaction rejected by user.';
         }
       }
 
@@ -136,6 +117,21 @@ export const useNounsAuction = () => {
         status: 'error',
         duration: 5000,
       });
+
+    } finally {
+      // Always attempt to switch back to Optimism
+      try {
+        await walletClient.switchChain({ id: optimism.id });
+      } catch (switchError) {
+        console.error('Failed to switch back to Optimism:', switchError);
+        toast({
+          title: 'Network Switch Failed',
+          description: 'Failed to switch back to Optimism. Please switch manually to continue using NOMO.',
+          status: 'warning',
+          duration: 8000,
+          isClosable: true,
+        });
+      }
     }
   };
 
