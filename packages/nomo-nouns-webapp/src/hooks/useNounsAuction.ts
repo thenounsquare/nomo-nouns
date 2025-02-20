@@ -93,6 +93,7 @@ export const useNounsAuction = () => {
         title: 'Settlement Submitted',
         description: `Transaction Sent. Switching back to Optimism...`,
         status: 'success',
+        position: 'top-right',
       });
 
     } catch (error) {
@@ -116,6 +117,7 @@ export const useNounsAuction = () => {
         description: errorMessage,
         status: 'error',
         duration: 5000,
+        position: 'top-right',
       });
 
     } finally {
@@ -130,6 +132,7 @@ export const useNounsAuction = () => {
           status: 'warning',
           duration: 8000,
           isClosable: true,
+          position: 'top-right',
         });
       }
     }

@@ -136,53 +136,65 @@ export const NextNounPreview: FC<{
 
   // Frame component without the divider
   const NounFrame = ({ preview, isLoading }: { preview?: NounPreview, isLoading?: boolean }) => (
-    <Center w="full" bg="gray.800" borderRadius="xl" p={8}>
-      <VStack spacing={6} align="center" maxW="container.sm">
-        <VStack>
-          <Text color="white" fontSize="lg">
-            {isLoading ? "Loading..." : `Noun ${preview?.id}${preview?.id.endsWith('0') ? ' (Nounders)' : ''}`}
-          </Text>
-          <Box 
-            w="320px"
-            position="relative"
-            _before={{
-              content: '""',
-              display: 'block',
-              paddingTop: '100%'
-            }}
-            bg="gray.900"
-            borderRadius="xl"
-            overflow="hidden"
-            border="2px solid"
-            borderColor="gray.700"
-          >
-            <Center
+    <Box w="full" maxW="320px" flex="1 1 0">
+      <VStack spacing={4}>
+        <Text color="gray.800" _dark={{ color: 'white' }} fontSize="lg">
+          {isLoading ? "Loading..." : `Noun ${preview?.id}`}
+        </Text>
+        <Box 
+          w="full"
+          position="relative"
+          _before={{
+            content: '""',
+            display: 'block',
+            paddingTop: '100%'
+          }}
+          borderRadius="xl"
+          overflow="hidden"
+          _dark={{ borderColor: 'gray.700' }}
+        >
+          {!isLoading && preview?.id.endsWith('0') && (
+            <Box
               position="absolute"
-              top="0"
-              left="0"
-              right="0"
-              bottom="0"
+              bottom={1.5}
+              left={1.5}
+              bg="whiteAlpha.700"
+              color="blackAlpha.900"
+              fontSize={["2xs", "xs"]}
+              px={1.5}
+              py={0.5}
+              borderRadius="lg"
+              zIndex={1}
             >
-              {isLoading ? (
-                <Box p={8}>
-                  <NomoLoading boxSize="xs" />
-                </Box>
-              ) : (
-                <img 
-                  src={`data:image/svg+xml;base64,${preview?.svg}`}
-                  alt={`Noun ${preview?.id} Preview`}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'contain'
-                  }}
-                />
-              )}
-            </Center>
-          </Box>
-        </VStack>
+              Nounders
+            </Box>
+          )}
+          <Center
+            position="absolute"
+            top="0"
+            left="0"
+            right="0"
+            bottom="0"
+          >
+            {isLoading ? (
+              <Box p={8}>
+                <NomoLoading boxSize="xs" />
+              </Box>
+            ) : (
+              <img 
+                src={`data:image/svg+xml;base64,${preview?.svg}`}
+                alt={`Noun ${preview?.id} Preview`}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain'
+                }}
+              />
+            )}
+          </Center>
+        </Box>
       </VStack>
-    </Center>
+    </Box>
   );
 
   // Preview content with a single title
@@ -190,22 +202,29 @@ export const NextNounPreview: FC<{
     const content = error ? (
       <NounFrame preview={{ id: '0', svg: '' }} />
     ) : (
-      <HStack spacing={6} align="start">
-        {loading ? (
-          nextNounIds.map(id => (
-            <NounFrame key={id} isLoading={true} />
-          ))
-        ) : (
-          nounPreviews.map(preview => (
-            <NounFrame key={preview.id} preview={preview} />
-          ))
-        )}
-      </HStack>
+      <Box maxW="container.lg" w="full" px={4}>
+        <HStack 
+          spacing={6} 
+          justify="center"
+          align="start"
+          w="full"
+        >
+          {loading ? (
+            nextNounIds.map(id => (
+              <NounFrame key={id} isLoading={true} />
+            ))
+          ) : (
+            nounPreviews.map(preview => (
+              <NounFrame key={preview.id} preview={preview} />
+            ))
+          )}
+        </HStack>
+      </Box>
     );
 
     return (
-      <VStack spacing={0}>
-        <Heading fontSize="xl" fontWeight="bold" color="white">
+      <VStack spacing={6} w="full">
+        <Heading fontSize="xl" fontWeight="bold" color="gray.800" _dark={{ color: 'white' }}>
           Pick The Next Noun{nextNounIds.length > 1 ? 's' : ''}!
         </Heading>
         {content}
