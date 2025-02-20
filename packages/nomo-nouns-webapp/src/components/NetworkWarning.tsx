@@ -11,24 +11,18 @@ export const NetworkWarning = () => {
   const targetChain = import.meta.env.DEV ? optimismGoerli : optimism;
 
   useEffect(() => {
-    // On initial connection, force switch to Optimism
+    // Always force switch to Optimism when chain changes (except during settle which handles its own switching)
     if (chain && chain.id !== targetChain.id && !chain.unsupported) {
       switchNetwork?.(targetChain.id);
-    }
-  }, []); // Empty deps array means this only runs on mount
-
-  useEffect(() => {
-    // Show warning when user manually switches to mainnet
-    if (chain && chain.id !== targetChain.id) {
       toast({
-        title: 'Network Switch Detected',
-        description: `You need to be on Optimism to play NOMO. Don't worry about switching to mainnet for settling Nouns - we handle that automatically!`,
+        title: 'Network Switch',
+        description: 'NOMO only works on Optimism. If you\'re trying to settle Nouns, we\'ll handle the network switching automatically.',
         status: 'info',
         duration: 6000,
         isClosable: true,
       });
     }
-  }, [chain?.id]);
+  }, [chain?.id]); // Run whenever chain changes
 
   return null;
 }; 
