@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createPublicClient, http, createWalletClient, custom } from 'viem';
-import { mainnet, optimism } from 'viem/chains';
+import { mainnet, optimism, sepolia } from 'viem/chains';
 import { getDatabase, ref, onValue } from 'firebase/database';
 import { useToast } from '@chakra-ui/react';
 import { useAccount, useNetwork, useSwitchNetwork } from 'wagmi';
@@ -22,12 +22,18 @@ const NOUNS_AUCTION_ABI = [
   }
 ] as const;
 
-const NOUNS_AUCTION_ADDRESS = '0x830BD73E4184ceF73443C15111a1DF14e495C706';
+// L1 chain for Nouns auction settlement
+const settlementChain = import.meta.env.PROD ? mainnet : sepolia;
+
+// L1 Nouns auction address
+const NOUNS_AUCTION_ADDRESS = import.meta.env.PROD 
+  ? '0x830BD73E4184ceF73443C15111a1DF14e495C706'  // Mainnet
+  : '0x488609b7113FCf3B761A05956300d605E8f6BcAf'; // Sepolia
 
 // Create a dedicated mainnet client
 const mainnetClient = createPublicClient({
-  chain: mainnet,
-  transport: http('https://eth-mainnet.g.alchemy.com/v2/LjGiGtmIeZS9R1we1bibphWLlLLv8ZOX')
+  chain: settlementChain,
+  transport: http(`https://eth-${settlementChain.network}.g.alchemy.com/v2/${import.meta.env.VITE_ALCHEMY_APP_KEY}`)
 });
 
 export const useNounsAuction = () => {
@@ -75,11 +81,11 @@ export const useNounsAuction = () => {
 
     try {
       const walletClient = await createWalletClient({
-        chain: mainnet,
+        chain: settlementChain,
         transport: custom(window.ethereum)
       });
 
-      if (chain?.id !== mainnet.id) {
+      if (chain?.id !== settlementChain.id) {
         toast({
           title: 'Switching Network',
           description: 'Switching to Ethereum for settlement...',
@@ -87,7 +93,7 @@ export const useNounsAuction = () => {
           position: 'top-right',
         });
         
-        await switchNetwork?.(mainnet.id);
+        await switchNetwork?.(settlementChain.id);
       }
 
       const { request } = await mainnetClient.simulateContract({
