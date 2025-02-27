@@ -49,6 +49,22 @@ export const Header = () => {
         { name: "Optimism Goerli", chain: optimismGoerli },
         { name: "Sepolia", chain: sepolia }
       ];
+  
+  // Function to toggle between networks
+  const toggleNetwork = () => {
+    if (!chain) return;
+    
+    // Find the other network to switch to
+    const currentNetworkIndex = networks.findIndex(n => n.chain.id === chain.id);
+    if (currentNetworkIndex === -1) return;
+    
+    // Get the next network in the array (or go back to first if at the end)
+    const nextNetworkIndex = (currentNetworkIndex + 1) % networks.length;
+    const nextNetwork = networks[nextNetworkIndex];
+    
+    // Switch to the next network
+    switchNetwork?.(nextNetwork.chain.id);
+  };
 
   useEffect(() => {
     const hideSoundTooltip = () => {
@@ -88,30 +104,17 @@ export const Header = () => {
       )}
 
       <HStack>
-        {/* Network Switcher - refined styling to match ConnectKit button */}
-        {!isMobile && (
-          <Menu>
-            <MenuButton 
-              as={Button} 
-              fontSize="xs"
-              fontWeight="normal"
-              px={4}
-              py={2}
-            >
-              {chain?.name || "Select Network"}
-            </MenuButton>
-            <MenuList>
-              {networks.map((network) => (
-                <MenuItem 
-                  key={network.chain.id}
-                  onClick={() => switchNetwork?.(network.chain.id)}
-                  fontWeight={chain?.id === network.chain.id ? "bold" : "normal"}
-                >
-                  {network.name}
-                </MenuItem>
-              ))}
-            </MenuList>
-          </Menu>
+        {/* Network Switcher */}
+        {!isMobile && chain && (
+          <Button
+            onClick={toggleNetwork}
+            fontSize="xs"
+            fontWeight="normal"
+            px={4}
+            py={2}
+          >
+            {chain?.name || "Select Network"}
+          </Button>
         )}
         
         {/* Wallet connect button */}
