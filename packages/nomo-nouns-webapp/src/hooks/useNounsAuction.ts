@@ -96,9 +96,6 @@ export const useNounsAuction = () => {
         });
         
         await switchNetwork?.(settlementChain.id);
-        
-        // Add a small delay to allow the wallet to complete the switch
-        await new Promise(resolve => setTimeout(resolve, 500));
       }
 
       const { request } = await mainnetClient.simulateContract({
