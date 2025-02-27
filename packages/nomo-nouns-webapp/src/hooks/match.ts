@@ -166,7 +166,7 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
   } = match;
   
   const { chain } = useNetwork();
-  const { switchNetwork, isLoading: isSwitching } = useSwitchNetwork();
+  const { switchNetwork } = useSwitchNetwork();
   const targetChain = import.meta.env.PROD ? optimism : optimismGoerli;
   const { data: signer } = useSigner();
   const toast = useToast();
@@ -174,6 +174,8 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
   
   // Store mint parameters for delayed execution after network switch
   const pendingMintRef = useRef<number | null>(null);
+  // Track the previous chain to detect actual changes
+  const previousChainRef = useRef(chain?.id);
   
   const { data: mintSignature } = useQuery(
     ["mintSignature", nounId, blockNumberHash],
@@ -196,34 +198,18 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
     }
   );
   
-  // This effect runs when the network changes
-  useEffect(() => {
-    // If we have a pending mint and we're now on the target chain, execute it
-    if (chain?.id === targetChain.id && pendingMintRef.current !== null && !isSwitching) {
-      const quantity = pendingMintRef.current;
-      pendingMintRef.current = null; // Clear the pending mint
-      
-      // Small delay to ensure wallet is ready after network switch
-      setTimeout(() => {
-        executeMint(quantity);
-      }, 500);
-    }
-  }, [chain, isSwitching]);
-  
-  if (!signer || !mintSignature) {
-    return { canMint: false, mintNomo: undefined };
-  }
-
-  const { nomoToken } = import.meta.env.PROD
-    ? getOptimismSdk(signer)
-    : getOptimisticGoerliSdk(signer);
-
-  // The actual mint execution function
-  const executeMint = async (quantity: number) => {
+  // Define the executeMint function early to avoid reference issues
+  const executeMint = useCallback(async (quantity: number) => {
+    if (!signer || !mintSignature) return;
     if (mintingRef.current) return; // Prevent concurrent minting
+    
     mintingRef.current = true;
     
     try {
+      const { nomoToken } = import.meta.env.PROD
+        ? getOptimismSdk(signer)
+        : getOptimisticGoerliSdk(signer);
+        
       const mintPrice = getMintPrice(Math.floor(Date.now() / 1000), match);
       const { hash } = match.electedNomoTally.block;
       
@@ -271,7 +257,29 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
     } finally {
       mintingRef.current = false;
     }
-  };
+  }, [signer, mintSignature, match, nounId, toast]);
+  
+  // This effect runs when the network changes
+  useEffect(() => {
+    // Only proceed if we have a pending mint and the chain has actually changed
+    if (chain?.id !== previousChainRef.current && 
+        chain?.id === targetChain.id && 
+        pendingMintRef.current !== null) {
+      
+      const quantity = pendingMintRef.current;
+      pendingMintRef.current = null; // Clear the pending mint
+      
+      // Execute the mint immediately when we detect the actual chain change
+      executeMint(quantity);
+    }
+    
+    // Update the previous chain reference
+    previousChainRef.current = chain?.id;
+  }, [chain?.id, targetChain.id, executeMint]);
+  
+  if (!signer || !mintSignature) {
+    return { canMint: false, mintNomo: undefined };
+  }
 
   // The public-facing mint function that handles network switching
   const mintNomo = async (quantity: number) => {
