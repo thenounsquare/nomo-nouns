@@ -40,6 +40,7 @@ export const useNounsAuction = () => {
   }>({
     isAuctionSettled: false
   });
+  const [isSettling, setIsSettling] = useState(false);
 
   useEffect(() => {
     const database = getDatabase();
@@ -67,6 +68,8 @@ export const useNounsAuction = () => {
       return;
     }
 
+    setIsSettling(true);
+
     const walletClient = await createWalletClient({
       chain: mainnet,
       transport: custom(window.ethereum)
@@ -78,6 +81,8 @@ export const useNounsAuction = () => {
       // Only switch to mainnet if we're not already there
       if (currentChainId !== mainnet.id) {
         await walletClient.switchChain({ id: mainnet.id });
+        // Add a small delay to ensure chain switch is complete
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
 
       const { request } = await mainnetClient.simulateContract({
@@ -91,10 +96,23 @@ export const useNounsAuction = () => {
 
       toast({
         title: 'Settlement Submitted',
-        description: `Transaction Sent. Switching back to Optimism...`,
+        description: `Transaction Sent. Waiting for confirmation...`,
         status: 'success',
         position: 'top-right',
       });
+
+      // Wait for transaction to be mined
+      await mainnetClient.waitForTransactionReceipt({ hash });
+
+      toast({
+        title: 'Settlement Confirmed',
+        description: `Transaction confirmed. Switching back to Optimism...`,
+        status: 'success',
+        position: 'top-right',
+      });
+
+      // Now safe to switch back to Optimism
+      await walletClient.switchChain({ id: optimism.id });
 
     } catch (error) {
       console.error('Settlement error:', error);
@@ -120,27 +138,20 @@ export const useNounsAuction = () => {
         position: 'top-right',
       });
 
-    } finally {
-      // Always attempt to switch back to Optimism
+      // If there's an error, try to switch back to Optimism
       try {
         await walletClient.switchChain({ id: optimism.id });
       } catch (switchError) {
         console.error('Failed to switch back to Optimism:', switchError);
-        toast({
-          title: 'Network Switch Failed',
-          description: 'Failed to switch back to Optimism. Please switch manually to continue using NOMO.',
-          status: 'warning',
-          duration: 8000,
-          isClosable: true,
-          position: 'top-right',
-        });
       }
+    } finally {
+      setIsSettling(false);
     }
   };
 
   return {
     ...auctionState,
     settle,
-    isSettling: false,
+    isSettling,
   };
 }; 

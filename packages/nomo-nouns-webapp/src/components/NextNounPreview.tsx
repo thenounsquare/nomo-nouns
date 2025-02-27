@@ -58,10 +58,12 @@ export const NextNounPreview: FC<{
     return onValue(currentMatchRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
+        console.log('Current match updated:', data);
         setCurrentMatch({
           nounId: data.nounId,
           endTime: data.endTime
         });
+        setLoading(true);
       }
     });
   }, []);
@@ -105,6 +107,7 @@ export const NextNounPreview: FC<{
     const updateNounPreviews = async () => {
       try {
         setLoading(true);
+        console.log('Updating noun previews for IDs:', nextNounIds);
         const previews = await Promise.all(
           nextNounIds.map(async (id) => ({
             id: id.toString(),
@@ -118,6 +121,7 @@ export const NextNounPreview: FC<{
         }
       } catch (error) {
         if (mounted) {
+          console.error('Error updating previews:', error);
           setError(error instanceof Error ? error.message : 'Unknown error');
         }
       } finally {
@@ -132,7 +136,7 @@ export const NextNounPreview: FC<{
     return () => {
       mounted = false;
     };
-  }, [latestBlockHash, nextNounIds, generateNounSvg]);
+  }, [latestBlockHash, nextNounIds, generateNounSvg, currentMatch?.nounId]);
 
   // Frame component without the divider
   const NounFrame = ({ preview, isLoading }: { preview?: NounPreview, isLoading?: boolean }) => (
