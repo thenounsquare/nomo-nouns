@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { createPublicClient, http, createWalletClient, custom } from 'viem';
-import { mainnet, optimism } from 'viem/chains';
+import { mainnet, optimism, sepolia } from 'viem/chains';
 import { getDatabase, ref, onValue } from 'firebase/database';
 import { useToast } from '@chakra-ui/react';
-import { useAccount } from 'wagmi';
+import { useAccount, useNetwork, useSwitchNetwork } from 'wagmi';
 
 const NOUNS_AUCTION_ABI = [
   {
@@ -22,16 +22,24 @@ const NOUNS_AUCTION_ABI = [
   }
 ] as const;
 
-const NOUNS_AUCTION_ADDRESS = '0x830BD73E4184ceF73443C15111a1DF14e495C706';
+// L1 chain for Nouns auction settlement
+const settlementChain = import.meta.env.PROD ? mainnet : sepolia;
+
+// L1 Nouns auction address
+const NOUNS_AUCTION_ADDRESS = import.meta.env.PROD 
+  ? '0x830BD73E4184ceF73443C15111a1DF14e495C706'  // Mainnet
+  : '0x488609b7113FCf3B761A05956300d605E8f6BcAf'; // Sepolia
 
 // Create a dedicated mainnet client
 const mainnetClient = createPublicClient({
-  chain: mainnet,
-  transport: http('https://eth-mainnet.g.alchemy.com/v2/LjGiGtmIeZS9R1we1bibphWLlLLv8ZOX')
+  chain: settlementChain,
+  transport: http(`https://eth-${settlementChain.network}.g.alchemy.com/v2/${import.meta.env.VITE_ALCHEMY_APP_KEY}`)
 });
 
 export const useNounsAuction = () => {
   const { address } = useAccount();
+  const { chain } = useNetwork();
+  const { switchNetwork } = useSwitchNetwork();
   const toast = useToast();
   const [auctionState, setAuctionState] = useState<{
     currentNounId?: number;
@@ -64,25 +72,30 @@ export const useNounsAuction = () => {
         title: 'Wallet Not Connected',
         description: 'Please connect your wallet to settle the Nouns auction',
         status: 'error',
+        position: 'top-right',
       });
       return;
     }
 
     setIsSettling(true);
 
-    const walletClient = await createWalletClient({
-      chain: mainnet,
-      transport: custom(window.ethereum)
-    });
-
-    const currentChainId = await walletClient.getChainId();
-
     try {
-      // Only switch to mainnet if we're not already there
-      if (currentChainId !== mainnet.id) {
-        await walletClient.switchChain({ id: mainnet.id });
-        // Add a small delay to ensure chain switch is complete
-        await new Promise(resolve => setTimeout(resolve, 1000));
+      const walletClient = await createWalletClient({
+        chain: settlementChain,
+        transport: custom(window.ethereum)
+      });
+
+      if (chain?.id !== settlementChain.id) {
+        toast({
+          title: 'Switching Network',
+          description: import.meta.env.DEV 
+            ? 'Switching to Sepolia for settlement...'
+            : 'Switching to Ethereum for settlement...',
+          status: 'info',
+          position: 'top-right',
+        });
+        
+        await switchNetwork?.(settlementChain.id);
       }
 
       const { request } = await mainnetClient.simulateContract({
@@ -96,23 +109,19 @@ export const useNounsAuction = () => {
 
       toast({
         title: 'Settlement Submitted',
-        description: `Transaction Sent. Waiting for confirmation...`,
+        description: 'Transaction sent. Waiting for confirmation...',
         status: 'success',
         position: 'top-right',
       });
 
-      // Wait for transaction to be mined
       await mainnetClient.waitForTransactionReceipt({ hash });
 
       toast({
-        title: 'Settlement Confirmed',
-        description: `Transaction confirmed. Switching back to Optimism...`,
+        title: 'Settlement Successful',
+        description: 'Auction has been settled',
         status: 'success',
         position: 'top-right',
       });
-
-      // Now safe to switch back to Optimism
-      await walletClient.switchChain({ id: optimism.id });
 
     } catch (error) {
       console.error('Settlement error:', error);
@@ -137,13 +146,6 @@ export const useNounsAuction = () => {
         duration: 5000,
         position: 'top-right',
       });
-
-      // If there's an error, try to switch back to Optimism
-      try {
-        await walletClient.switchChain({ id: optimism.id });
-      } catch (switchError) {
-        console.error('Failed to switch back to Optimism:', switchError);
-      }
     } finally {
       setIsSettling(false);
     }

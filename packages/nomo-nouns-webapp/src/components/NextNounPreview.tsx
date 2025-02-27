@@ -11,7 +11,7 @@ import { createPublicClient, http } from 'viem';
 
 const mainnetClient = createPublicClient({
   chain: mainnet,
-  transport: http('https://eth-mainnet.g.alchemy.com/v2/LjGiGtmIeZS9R1we1bibphWLlLLv8ZOX')
+  transport: http(`https://eth-mainnet.g.alchemy.com/v2/${import.meta.env.VITE_ALCHEMY_APP_KEY}`)
 });
 
 const NOUNS_AUCTION_ADDRESS = '0x830BD73E4184ceF73443C15111a1DF14e495C706';
@@ -59,14 +59,19 @@ export const NextNounPreview: FC<{
       const data = snapshot.val();
       if (data) {
         console.log('Current match updated:', data);
+        
+        // Only trigger loading if nounId has changed
+        if (data.nounId !== currentMatch?.nounId) {
+          setLoading(true);
+        }
+        
         setCurrentMatch({
           nounId: data.nounId,
           endTime: data.endTime
         });
-        setLoading(true);
       }
     });
-  }, []);
+  }, [currentMatch?.nounId]); // Add dependency to access current nounId
 
   const effectiveNounId = testNounId ?? currentMatch?.nounId;
 
