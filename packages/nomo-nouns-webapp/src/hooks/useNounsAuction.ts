@@ -88,7 +88,9 @@ export const useNounsAuction = () => {
       if (chain?.id !== settlementChain.id) {
         toast({
           title: 'Switching Network',
-          description: 'Switching to Ethereum for settlement...',
+          description: import.meta.env.DEV 
+            ? 'Switching to Sepolia for settlement...'
+            : 'Switching to Ethereum for settlement...',
           status: 'info',
           position: 'top-right',
         });
