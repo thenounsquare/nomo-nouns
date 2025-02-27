@@ -1,5 +1,6 @@
 import { HStack, Image, Link, Text, Tooltip, Box } from "@chakra-ui/react";
 import volky from "../assets/volky.png";
+import benbodhi from "../assets/benbodhi.png";
 import { FaDiscord, FaGithub, FaTwitter } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { HiUsers } from "react-icons/hi";
@@ -81,8 +82,13 @@ export const Footer = () => {
           <FaGithub size={24} />
         </Link>
         <Tooltip hasArrow label={"by Volky"}>
-          <Link isExternal href={"https://twitter.com/volkyeth"}>
+          <Link isExternal href={"https://x.com/volkyeth"}>
             <Image src={volky} h={"24px"} />
+          </Link>
+        </Tooltip>
+        <Tooltip hasArrow label={"by Benbodhi"}>
+          <Link isExternal href={"https://benbodhi.com"}>
+            <Image src={benbodhi} h={"24px"} />
           </Link>
         </Tooltip>
       </HStack>
