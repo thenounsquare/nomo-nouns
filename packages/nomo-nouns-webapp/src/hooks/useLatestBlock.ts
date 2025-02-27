@@ -12,7 +12,7 @@ export const useLatestBlock = (): BlockData => {
   const [currentNounId, setCurrentNounId] = useState<number | undefined>(undefined);
   
   useEffect(() => {
-    const provider = new AlchemyProvider('mainnet', 'LjGiGtmIeZS9R1we1bibphWLlLLv8ZOX');
+    const provider = new AlchemyProvider('mainnet', import.meta.env.VITE_ALCHEMY_APP_KEY);
     const database = getDatabase();
     let mounted = true;
 
@@ -27,7 +27,7 @@ export const useLatestBlock = (): BlockData => {
     });
 
     // Subscribe to new blocks via WebSocket for instant hash updates
-    const ws = new WebSocket('wss://eth-mainnet.g.alchemy.com/v2/LjGiGtmIeZS9R1we1bibphWLlLLv8ZOX');
+    const ws = new WebSocket(`wss://eth-mainnet.g.alchemy.com/v2/${import.meta.env.VITE_ALCHEMY_APP_KEY}`);
     
     ws.onmessage = (event) => {
       if (!mounted) return;

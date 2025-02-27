@@ -11,7 +11,7 @@ import { createPublicClient, http } from 'viem';
 
 const mainnetClient = createPublicClient({
   chain: mainnet,
-  transport: http('https://eth-mainnet.g.alchemy.com/v2/LjGiGtmIeZS9R1we1bibphWLlLLv8ZOX')
+  transport: http(`https://eth-mainnet.g.alchemy.com/v2/${import.meta.env.VITE_ALCHEMY_APP_KEY}`)
 });
 
 const NOUNS_AUCTION_ADDRESS = '0x830BD73E4184ceF73443C15111a1DF14e495C706';
