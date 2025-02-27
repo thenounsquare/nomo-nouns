@@ -166,8 +166,14 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
   } = match;
   
   const { chain } = useNetwork();
-  const { switchNetwork } = useSwitchNetwork();
+  const { switchNetwork, isLoading: isSwitching } = useSwitchNetwork();
   const targetChain = import.meta.env.PROD ? optimism : optimismGoerli;
+  const { data: signer } = useSigner();
+  const toast = useToast();
+  const mintingRef = useRef(false); // Prevent duplicate minting attempts
+  
+  // Store mint parameters for delayed execution after network switch
+  const pendingMintRef = useRef<number | null>(null);
   
   const { data: mintSignature } = useQuery(
     ["mintSignature", nounId, blockNumberHash],
@@ -190,8 +196,19 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
     }
   );
   
-  const { data: signer } = useSigner();
-  const toast = useToast();
+  // This effect runs when the network changes
+  useEffect(() => {
+    // If we have a pending mint and we're now on the target chain, execute it
+    if (chain?.id === targetChain.id && pendingMintRef.current !== null && !isSwitching) {
+      const quantity = pendingMintRef.current;
+      pendingMintRef.current = null; // Clear the pending mint
+      
+      // Small delay to ensure wallet is ready after network switch
+      setTimeout(() => {
+        executeMint(quantity);
+      }, 500);
+    }
+  }, [chain, isSwitching]);
   
   if (!signer || !mintSignature) {
     return { canMint: false, mintNomo: undefined };
@@ -201,40 +218,15 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
     ? getOptimismSdk(signer)
     : getOptimisticGoerliSdk(signer);
 
-  const mintNomo = async (quantity: number) => {
-    const targetChain = import.meta.env.PROD ? optimism : optimismGoerli;
-    
-    // If we're not on the right network, switch and inform the user to try again
-    if (chain?.id !== targetChain.id) {
-      toast({
-        title: 'Wrong Network',
-        description: 'Switching to Optimism for you. Please try minting again.',
-        status: 'info',
-        duration: 5000,
-        isClosable: true,
-        position: 'top-right',
-      });
-      
-      try {
-        switchNetwork?.(targetChain.id);
-      } catch (error) {
-        toast({
-          title: 'Network Switch Failed',
-          description: 'Failed to switch to Optimism. Please switch manually and try again.',
-          status: 'error',
-          duration: 5000,
-          isClosable: true,
-          position: 'top-right',
-        });
-      }
-      return;
-    }
-
-    // We're on the right network, proceed with minting
-    const mintPrice = getMintPrice(Math.floor(Date.now() / 1000), match);
-    const { hash } = match.electedNomoTally.block;
+  // The actual mint execution function
+  const executeMint = async (quantity: number) => {
+    if (mintingRef.current) return; // Prevent concurrent minting
+    mintingRef.current = true;
     
     try {
+      const mintPrice = getMintPrice(Math.floor(Date.now() / 1000), match);
+      const { hash } = match.electedNomoTally.block;
+      
       const tx = await nomoToken.mint(
         nounId,
         hash,
@@ -276,7 +268,49 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
         isClosable: true,
         position: "top-right",
       });
+    } finally {
+      mintingRef.current = false;
     }
+  };
+
+  // The public-facing mint function that handles network switching
+  const mintNomo = async (quantity: number) => {
+    // If already minting, don't allow another attempt
+    if (mintingRef.current) return;
+    
+    // If we're not on the right network, switch and store the mint for later
+    if (chain?.id !== targetChain.id) {
+      toast({
+        title: 'Switching Network',
+        description: 'Switching to Optimism and minting automatically...',
+        status: 'info',
+        duration: 5000,
+        isClosable: true,
+        position: 'top-right',
+      });
+      
+      // Store the mint parameters for after the network switch
+      pendingMintRef.current = quantity;
+      
+      try {
+        await switchNetwork?.(targetChain.id);
+        // The useEffect will handle executing the mint after the network switch
+      } catch (error) {
+        pendingMintRef.current = null; // Clear the pending mint
+        toast({
+          title: 'Network Switch Failed',
+          description: 'Failed to switch to Optimism. Please switch manually and try again.',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+          position: 'top-right',
+        });
+      }
+      return;
+    }
+
+    // If we're already on the right network, mint immediately
+    await executeMint(quantity);
   };
 
   return { canMint: true, mintNomo };
