@@ -7,24 +7,17 @@ import {
   Text,
   Tooltip,
   useColorMode,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  Button,
 } from "@chakra-ui/react";
 import Nomoggles from "../assets/nomoggles.svg";
 import { HiUser, HiUsers } from "react-icons/hi";
 import { MdMusicNote, MdMusicOff } from "react-icons/md";
 import { ConnectKitButton } from "connectkit";
-import { MoonIcon, SunIcon, ChevronDownIcon } from "@chakra-ui/icons";
+import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 import { useAppState } from "../state/appState";
 import { useActiveUserCount } from "../hooks/session";
 import { useEffect, useState } from "react";
 import { useIsMobile } from "../hooks/isMobile";
 import { keyframes } from '@emotion/react';
-import { useNetwork, useSwitchNetwork } from 'wagmi';
-import { optimism, optimismGoerli, mainnet, sepolia } from 'wagmi/chains';
 
 export const Header = () => {
   const { soundEnabled, toggleSound } = useAppState();
@@ -34,21 +27,6 @@ export const Header = () => {
   const { toggleColorMode, colorMode } = useColorMode();
   const isMobile = useIsMobile();
   const activeUserCount = useActiveUserCount();
-  
-  // Network switching functionality
-  const { chain } = useNetwork();
-  const { switchNetwork } = useSwitchNetwork();
-  
-  // Define available networks based on environment
-  const networks = import.meta.env.PROD 
-    ? [
-        { name: "Optimism", chain: optimism },
-        { name: "Ethereum", chain: mainnet }
-      ]
-    : [
-        { name: "Optimism Goerli", chain: optimismGoerli },
-        { name: "Sepolia", chain: sepolia }
-      ];
 
   useEffect(() => {
     const hideSoundTooltip = () => {
@@ -88,36 +66,6 @@ export const Header = () => {
       )}
 
       <HStack>
-        {/* Network Switcher - refined styling to match ConnectKit button */}
-        {!isMobile && (
-          <Menu>
-            <MenuButton 
-              as={Button} 
-              fontSize="xs"
-              fontWeight="normal"
-              px={4}
-              py={2}
-            >
-              {chain?.name || "Select Network"}
-            </MenuButton>
-            <MenuList>
-              {networks.map((network) => (
-                <MenuItem 
-                  key={network.chain.id}
-                  onClick={() => switchNetwork?.(network.chain.id)}
-                  fontWeight={chain?.id === network.chain.id ? "bold" : "normal"}
-                >
-                  {network.name}
-                </MenuItem>
-              ))}
-            </MenuList>
-          </Menu>
-        )}
-        
-        {/* Wallet connect button */}
-        {!isMobile && <ConnectKitButton label={"Connect to play"} />}
-        
-        {/* Sound toggle */}
         <Tooltip
           isOpen={showSoundTooltip}
           isDisabled={soundEnabled}
@@ -139,8 +87,7 @@ export const Header = () => {
             transition={"min-width 1s"}
           />
         </Tooltip>
-        
-        {/* Theme toggle */}
+        {!isMobile && <ConnectKitButton label={"Connect to play"} />}
         <IconButton
           aria-label={"ColorMode"}
           onClick={toggleColorMode}

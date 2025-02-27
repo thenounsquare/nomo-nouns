@@ -164,11 +164,6 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
       block: { hash: blockNumberHash },
     },
   } = match;
-  
-  const { chain } = useNetwork();
-  const { switchNetwork } = useSwitchNetwork();
-  const targetChain = import.meta.env.PROD ? optimism : optimismGoerli;
-  
   const { data: mintSignature } = useQuery(
     ["mintSignature", nounId, blockNumberHash],
     () =>
@@ -184,19 +179,19 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
 
         return r.data;
       }),
-    { 
-      enabled: status === "Selling",
-      retry: false
-    }
+    { enabled: status === "Selling" }
   );
-  
   const { data: signer } = useSigner();
   const toast = useToast();
+
+  const { chain } = useNetwork();
+  const { switchNetwork } = useSwitchNetwork();
   
   if (!signer || !mintSignature) {
     return { canMint: false, mintNomo: undefined };
   }
 
+  //Should uncomment and add Optimism SDK
   const { nomoToken } = import.meta.env.PROD
     ? getOptimismSdk(signer)
     : getOptimisticGoerliSdk(signer);
@@ -204,38 +199,32 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
   const mintNomo = async (quantity: number) => {
     const targetChain = import.meta.env.PROD ? optimism : optimismGoerli;
     
-    // If we're not on the right network, switch and inform the user to try again
     if (chain?.id !== targetChain.id) {
       toast({
-        title: 'Wrong Network',
-        description: 'Switching to Optimism for you. Please try minting again.',
+        title: 'Switching Network',
+        description: 'Switching to Optimism for minting...',
         status: 'info',
-        duration: 5000,
-        isClosable: true,
         position: 'top-right',
       });
       
       try {
-        switchNetwork?.(targetChain.id);
+        await switchNetwork?.(targetChain.id);
       } catch (error) {
         toast({
           title: 'Network Switch Failed',
-          description: 'Failed to switch to Optimism. Please switch manually and try again.',
+          description: 'Failed to switch to Optimism. Please try manually.',
           status: 'error',
-          duration: 5000,
-          isClosable: true,
           position: 'top-right',
         });
+        return;
       }
-      return;
     }
 
-    // We're on the right network, proceed with minting
     const mintPrice = getMintPrice(Math.floor(Date.now() / 1000), match);
     const { hash } = match.electedNomoTally.block;
     
-    try {
-      const tx = await nomoToken.mint(
+    return nomoToken
+      .mint(
         nounId,
         hash,
         match.startTime,
@@ -245,38 +234,30 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
         {
           value: mintPrice.mul(quantity),
         }
-      );
-      
-      toast({
-        title: "Transaction Submitted",
-        description: "Your mint transaction has been submitted to the network.",
-        status: "info",
-        duration: 5000,
-        isClosable: true,
-        position: "top-right",
+      )
+      .then((tx: { wait: () => void }) => tx.wait())
+      .then(() => {
+        toast({
+          title: "Mint successful",
+          description: `Successfully minted ${quantity} Nomo${
+            quantity > 1 ? "s" : ""
+          }.`,
+          status: "success",
+          isClosable: true,
+          position: "top-right",
+        });
+      })
+      .catch(() => {
+        toast({
+          title: "Mint failed",
+          description: `Failed to mint ${quantity} Nomo${
+            quantity > 1 ? "s" : ""
+          }. Check your wallet for details.`,
+          status: "error",
+          isClosable: true,
+          position: "top-right",
+        });
       });
-      
-      await tx.wait();
-      
-      toast({
-        title: "Mint Successful",
-        description: `Successfully minted ${quantity} Nomo${quantity > 1 ? "s" : ""}.`,
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-        position: "top-right",
-      });
-    } catch (error) {
-      console.error("Mint error:", error);
-      toast({
-        title: "Mint Failed",
-        description: `Failed to mint. ${(error as Error).message || "Check your wallet for details."}`,
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-        position: "top-right",
-      });
-    }
   };
 
   return { canMint: true, mintNomo };
