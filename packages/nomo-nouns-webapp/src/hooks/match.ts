@@ -191,7 +191,6 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
     return { canMint: false, mintNomo: undefined };
   }
 
-  //Should uncomment and add Optimism SDK
   const { nomoToken } = import.meta.env.PROD
     ? getOptimismSdk(signer)
     : getOptimisticGoerliSdk(signer);
@@ -208,7 +207,11 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
       });
       
       try {
-        await switchNetwork?.(targetChain.id);
+        // Initiate network switch
+        switchNetwork?.(targetChain.id);
+        
+        // Add a small delay to allow the wallet to complete the switch
+        await new Promise(resolve => setTimeout(resolve, 500));
       } catch (error) {
         toast({
           title: 'Network Switch Failed',
@@ -235,7 +238,7 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
           value: mintPrice.mul(quantity),
         }
       )
-      .then((tx: { wait: () => void }) => tx.wait())
+      .then((tx) => tx.wait())
       .then(() => {
         toast({
           title: "Mint successful",
