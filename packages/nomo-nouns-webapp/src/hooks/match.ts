@@ -11,7 +11,7 @@ import {
 import { get, push, ref, set } from "firebase/database";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
 import { useCallback, useEffect, useRef } from "react";
-import { useProvider, useSigner } from "wagmi";
+import { useProvider, useSigner, useNetwork, useSwitchNetwork } from "wagmi";
 import { currentTimestamp } from "./useTimestamp";
 import {
   getGoerliSdk,
@@ -21,6 +21,7 @@ import {
 import { useQuery } from "react-query";
 import { useToast } from "@chakra-ui/react";
 import { getClient } from "../config/wagmi";
+import { optimism, optimismGoerli } from "wagmi/chains";
 
 export const match = () => {
   const database = useFirebaseState((state) => state.db);
@@ -183,6 +184,9 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
   const { data: signer } = useSigner();
   const toast = useToast();
 
+  const { chain } = useNetwork();
+  const { switchNetwork } = useSwitchNetwork();
+  
   if (!signer || !mintSignature) {
     return { canMint: false, mintNomo: undefined };
   }
@@ -193,8 +197,32 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
     : getOptimisticGoerliSdk(signer);
 
   const mintNomo = async (quantity: number) => {
+    const targetChain = import.meta.env.PROD ? optimism : optimismGoerli;
+    
+    if (chain?.id !== targetChain.id) {
+      toast({
+        title: 'Switching Network',
+        description: 'Switching to Optimism for minting...',
+        status: 'info',
+        position: 'top-right',
+      });
+      
+      try {
+        await switchNetwork?.(targetChain.id);
+      } catch (error) {
+        toast({
+          title: 'Network Switch Failed',
+          description: 'Failed to switch to Optimism. Please try manually.',
+          status: 'error',
+          position: 'top-right',
+        });
+        return;
+      }
+    }
+
     const mintPrice = getMintPrice(Math.floor(Date.now() / 1000), match);
     const { hash } = match.electedNomoTally.block;
+    
     return nomoToken
       .mint(
         nounId,

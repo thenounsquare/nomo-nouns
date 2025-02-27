@@ -11,19 +11,27 @@ export const NetworkWarning = () => {
   const targetChain = import.meta.env.DEV ? optimismGoerli : optimism;
 
   useEffect(() => {
-    // Always force switch to Optimism when chain changes (except during settle which handles its own switching)
-    if (chain && chain.id !== targetChain.id && !chain.unsupported) {
-      switchNetwork?.(targetChain.id);
+    // Only switch to Optimism on initial connection
+    if (!chain) return;
+    
+    if (chain.unsupported) {
       toast({
-        title: 'Network Switch',
-        description: 'NOMO only works on Optimism. If you\'re trying to settle Nouns, we\'ll handle the network switching automatically.',
-        status: 'info',
-        duration: 15000,  // 15 seconds
+        title: 'Unsupported Network',
+        description: 'Please switch to Optimism or Ethereum Mainnet',
+        status: 'warning',
+        duration: 5000,
         isClosable: true,
         position: 'top-right',
       });
+      return;
     }
-  }, [chain?.id]); // Run whenever chain changes
+
+    // First connection defaults to Optimism
+    if (chain.id !== targetChain.id && !localStorage.getItem('hasConnectedBefore')) {
+      switchNetwork?.(targetChain.id);
+      localStorage.setItem('hasConnectedBefore', 'true');
+    }
+  }, [chain]);
 
   return null;
 }; 
