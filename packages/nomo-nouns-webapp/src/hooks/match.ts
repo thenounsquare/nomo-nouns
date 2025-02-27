@@ -179,17 +179,9 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
   // Track retry attempts for signer availability
   const retryAttemptsRef = useRef(0);
   
-  console.log("MINT DEBUG: Hook initialized", { 
-    chainId: chain?.id, 
-    targetChainId: targetChain.id,
-    hasSigner: !!signer,
-    status
-  });
-  
   const { data: mintSignature } = useQuery(
     ["mintSignature", nounId, blockNumberHash],
     () => {
-      console.log("MINT DEBUG: Fetching signature");
       return signForMint({
         nounId,
         blocknumberHash: blockNumberHash,
@@ -197,10 +189,8 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
         auctionEndTimestamp: match.endTime,
       }).then((r) => {
         if (!r?.data) {
-          console.error("MINT DEBUG: Signature fetch failed", r);
           throw "Couldn't get the mint signed";
         }
-        console.log("MINT DEBUG: Got signature", r.data.substring(0, 10) + "...");
         return r.data;
       });
     },
@@ -212,29 +202,17 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
   
   // Define the executeMint function early to avoid reference issues
   const executeMint = useCallback(async (quantity: number) => {
-    console.log("MINT DEBUG: executeMint called", { 
-      quantity, 
-      hasSigner: !!signer, 
-      hasSignature: !!mintSignature,
-      isMinting: mintingRef.current,
-      chainId: chain?.id
-    });
-    
     if (!signer || !mintSignature) {
-      console.error("MINT DEBUG: Missing signer or signature");
       return false;
     }
     
     if (mintingRef.current) {
-      console.log("MINT DEBUG: Already minting, skipping");
       return false;
     }
     
     mintingRef.current = true;
-    console.log("MINT DEBUG: Set minting flag to true");
     
     try {
-      console.log("MINT DEBUG: Initializing SDK");
       const { nomoToken } = import.meta.env.PROD
         ? getOptimismSdk(signer)
         : getOptimisticGoerliSdk(signer);
@@ -242,16 +220,6 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
       const mintPrice = getMintPrice(Math.floor(Date.now() / 1000), match);
       const { hash } = match.electedNomoTally.block;
       
-      console.log("MINT DEBUG: Preparing mint transaction", {
-        nounId,
-        hash: hash.substring(0, 10) + "...",
-        startTime: match.startTime,
-        endTime: match.endTime,
-        quantity,
-        mintPrice: mintPrice.toString()
-      });
-      
-      console.log("MINT DEBUG: Sending mint transaction");
       const tx = await nomoToken.mint(
         nounId,
         hash,
@@ -264,8 +232,6 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
         }
       );
       
-      console.log("MINT DEBUG: Transaction sent", tx.hash);
-      
       toast({
         title: "Transaction Submitted",
         description: "Your mint transaction has been submitted to the network.",
@@ -275,10 +241,8 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
         position: "top-right",
       });
       
-      console.log("MINT DEBUG: Waiting for transaction confirmation");
       await tx.wait();
       
-      console.log("MINT DEBUG: Transaction confirmed");
       toast({
         title: "Mint Successful",
         description: `Successfully minted ${quantity} Nomo${quantity > 1 ? "s" : ""}.`,
@@ -289,7 +253,6 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
       });
       return true;
     } catch (error) {
-      console.error("MINT DEBUG: Mint error", error);
       toast({
         title: "Mint Failed",
         description: `Failed to mint. ${(error as Error).message || "Check your wallet for details."}`,
@@ -300,22 +263,12 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
       });
       return false;
     } finally {
-      console.log("MINT DEBUG: Setting minting flag to false");
       mintingRef.current = false;
     }
   }, [signer, mintSignature, match, nounId, toast, chain?.id]);
   
   // This effect runs when the network changes or signer updates
   useEffect(() => {
-    console.log("MINT DEBUG: Network/signer effect running", {
-      currentChain: chain?.id,
-      previousChain: previousChainRef.current,
-      targetChain: targetChain.id,
-      pendingMint: pendingMintRef.current,
-      hasSigner: !!signer,
-      retryAttempts: retryAttemptsRef.current
-    });
-    
     // Only proceed if we have a pending mint and the chain has actually changed to the target chain
     if (chain?.id !== previousChainRef.current && 
         chain?.id === targetChain.id && 
@@ -323,7 +276,6 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
       
       // If we have a signer, execute the mint
       if (signer) {
-        console.log("MINT DEBUG: Network changed to target and signer available, executing pending mint");
         const quantity = pendingMintRef.current;
         pendingMintRef.current = null; // Clear the pending mint
         retryAttemptsRef.current = 0; // Reset retry counter
@@ -333,7 +285,6 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
       } 
       // If no signer yet but we haven't exceeded retry attempts, set up a retry
       else if (retryAttemptsRef.current < 10) {
-        console.log("MINT DEBUG: Network changed but signer not available yet, setting up retry", retryAttemptsRef.current);
         retryAttemptsRef.current++;
         
         // Try again in a moment
@@ -344,7 +295,6 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
       }
       // If we've exceeded retry attempts, give up and show an error
       else {
-        console.log("MINT DEBUG: Exceeded retry attempts, giving up");
         toast({
           title: "Mint Failed",
           description: "Failed to get a valid signer after network switch. Please try minting again.",
@@ -363,28 +313,18 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
   }, [chain?.id, targetChain.id, executeMint, signer, toast]);
   
   if (!signer || !mintSignature) {
-    console.log("MINT DEBUG: Missing signer or signature, returning canMint: false");
     return { canMint: false, mintNomo: undefined };
   }
 
   // The public-facing mint function that handles network switching
   const mintNomo = async (quantity: number) => {
-    console.log("MINT DEBUG: mintNomo called", {
-      quantity,
-      chainId: chain?.id,
-      targetChainId: targetChain.id,
-      isMinting: mintingRef.current
-    });
-    
     // If already minting, don't allow another attempt
     if (mintingRef.current) {
-      console.log("MINT DEBUG: Already minting, skipping");
       return;
     }
     
     // If we're not on the right network, switch and store the mint for later
     if (chain?.id !== targetChain.id) {
-      console.log("MINT DEBUG: Wrong network, switching");
       toast({
         title: 'Switching Network',
         description: 'Switching to Optimism and minting automatically...',
@@ -397,15 +337,11 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
       // Store the mint parameters for after the network switch
       pendingMintRef.current = quantity;
       retryAttemptsRef.current = 0; // Reset retry counter
-      console.log("MINT DEBUG: Stored pending mint", quantity);
       
       try {
-        console.log("MINT DEBUG: Initiating network switch");
         await switchNetwork?.(targetChain.id);
-        console.log("MINT DEBUG: Network switch initiated");
         // The useEffect will handle executing the mint after the network switch
       } catch (error) {
-        console.error("MINT DEBUG: Network switch failed", error);
         pendingMintRef.current = null; // Clear the pending mint
         toast({
           title: 'Network Switch Failed',
@@ -420,11 +356,9 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
     }
 
     // If we're already on the right network, mint immediately
-    console.log("MINT DEBUG: Already on right network, minting immediately");
     await executeMint(quantity);
   };
 
-  console.log("MINT DEBUG: Returning canMint: true");
   return { canMint: true, mintNomo };
 };
 
