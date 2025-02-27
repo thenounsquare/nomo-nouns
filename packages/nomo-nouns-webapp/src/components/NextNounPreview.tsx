@@ -59,14 +59,19 @@ export const NextNounPreview: FC<{
       const data = snapshot.val();
       if (data) {
         console.log('Current match updated:', data);
+        
+        // Only trigger loading if nounId has changed
+        if (data.nounId !== currentMatch?.nounId) {
+          setLoading(true);
+        }
+        
         setCurrentMatch({
           nounId: data.nounId,
           endTime: data.endTime
         });
-        setLoading(true);
       }
     });
-  }, []);
+  }, [currentMatch?.nounId]); // Add dependency to access current nounId
 
   const effectiveNounId = testNounId ?? currentMatch?.nounId;
 
