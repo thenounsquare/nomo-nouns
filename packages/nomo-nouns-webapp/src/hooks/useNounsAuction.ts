@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { createPublicClient, http, createWalletClient, custom } from 'viem';
 import { mainnet, optimism, sepolia } from 'viem/chains';
 import { getDatabase, ref, onValue } from 'firebase/database';
@@ -48,7 +48,12 @@ export const useNounsAuction = () => {
   }>({
     isAuctionSettled: false
   });
-  const [isSettling, setIsSettling] = useState(false);
+  
+  // New refs for tracking settlement state
+  const isSettlingRef = useRef(false);
+  const pendingSettleRef = useRef<boolean | null>(null);
+  const previousChainRef = useRef(chain?.id);
+  const retryAttemptsRef = useRef(0);
 
   useEffect(() => {
     const database = getDatabase();
@@ -66,7 +71,8 @@ export const useNounsAuction = () => {
     });
   }, []);
 
-  const settle = async () => {
+  // Define the executeSettle function early to avoid reference issues
+  const executeSettle = useCallback(async () => {
     if (!address || !window.ethereum) {
       toast({
         title: 'Wallet Not Connected',
@@ -74,32 +80,20 @@ export const useNounsAuction = () => {
         status: 'error',
         position: 'top-right',
       });
-      return;
+      return false;
     }
 
-    setIsSettling(true);
+    if (isSettlingRef.current) {
+      return false;
+    }
+
+    isSettlingRef.current = true;
 
     try {
       const walletClient = await createWalletClient({
         chain: settlementChain,
         transport: custom(window.ethereum)
       });
-
-      if (chain?.id !== settlementChain.id) {
-        toast({
-          title: 'Switching Network',
-          description: import.meta.env.DEV 
-            ? 'Switching to Sepolia for settlement...'
-            : 'Switching to Ethereum for settlement...',
-          status: 'info',
-          position: 'top-right',
-        });
-        
-        await switchNetwork?.(settlementChain.id);
-        
-        // Add a small delay to allow the wallet to complete the switch
-        await new Promise(resolve => setTimeout(resolve, 500));
-      }
 
       const { request } = await mainnetClient.simulateContract({
         address: NOUNS_AUCTION_ADDRESS,
@@ -125,7 +119,8 @@ export const useNounsAuction = () => {
         status: 'success',
         position: 'top-right',
       });
-
+      
+      return true;
     } catch (error) {
       console.error('Settlement error:', error);
       
@@ -149,14 +144,112 @@ export const useNounsAuction = () => {
         duration: 5000,
         position: 'top-right',
       });
+      
+      return false;
     } finally {
-      setIsSettling(false);
+      isSettlingRef.current = false;
     }
+  }, [address, toast]);
+
+  // This effect runs when the network changes
+  useEffect(() => {
+    // Only proceed if we have a pending settlement and the chain has actually changed to the target chain
+    if (chain?.id !== previousChainRef.current && 
+        chain?.id === settlementChain.id && 
+        pendingSettleRef.current !== null) {
+      
+      // If we have ethereum access, execute the settlement
+      if (window.ethereum) {
+        // Clear the pending settlement
+        pendingSettleRef.current = null;
+        retryAttemptsRef.current = 0;
+        
+        // Execute the settlement
+        executeSettle();
+      } 
+      // If no ethereum access yet but we haven't exceeded retry attempts, set up a retry
+      else if (retryAttemptsRef.current < 10) {
+        retryAttemptsRef.current++;
+        
+        // Try again in a moment
+        setTimeout(() => {
+          // Force a re-render to trigger this effect again
+          previousChainRef.current = 0; // Set to invalid chain ID to force the condition to evaluate again
+        }, 500);
+      }
+      // If we've exceeded retry attempts, give up and show an error
+      else {
+        toast({
+          title: 'Settlement Failed',
+          description: 'Failed to access wallet after network switch. Please try settling again.',
+          status: 'error',
+          duration: 5000,
+          position: 'top-right',
+        });
+        pendingSettleRef.current = null;
+        retryAttemptsRef.current = 0;
+      }
+    }
+    
+    // Update the previous chain reference
+    previousChainRef.current = chain?.id;
+  }, [chain?.id, executeSettle, toast]);
+
+  // The public-facing settle function that handles network switching
+  const settle = async () => {
+    if (!address || !window.ethereum) {
+      toast({
+        title: 'Wallet Not Connected',
+        description: 'Please connect your wallet to settle the Nouns auction',
+        status: 'error',
+        position: 'top-right',
+      });
+      return;
+    }
+
+    // If already settling, don't allow another attempt
+    if (isSettlingRef.current) {
+      return;
+    }
+    
+    // If we're not on the right network, switch and store the settlement for later
+    if (chain?.id !== settlementChain.id) {
+      toast({
+        title: 'Switching Network',
+        description: import.meta.env.DEV 
+          ? 'Switching to Sepolia for settlement...'
+          : 'Switching to Ethereum for settlement...',
+        status: 'info',
+        position: 'top-right',
+      });
+      
+      // Store the settlement intent for after the network switch
+      pendingSettleRef.current = true;
+      retryAttemptsRef.current = 0; // Reset retry counter
+      
+      try {
+        await switchNetwork?.(settlementChain.id);
+        // The useEffect will handle executing the settlement after the network switch
+      } catch (error) {
+        pendingSettleRef.current = null; // Clear the pending settlement
+        toast({
+          title: 'Network Switch Failed',
+          description: 'Failed to switch networks. Please switch manually and try again.',
+          status: 'error',
+          duration: 5000,
+          position: 'top-right',
+        });
+      }
+      return;
+    }
+
+    // If we're already on the right network, settle immediately
+    await executeSettle();
   };
 
   return {
     ...auctionState,
     settle,
-    isSettling,
+    isSettling: isSettlingRef.current,
   };
 }; 
