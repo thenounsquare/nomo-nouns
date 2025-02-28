@@ -24,7 +24,8 @@ import { useEffect, useState } from "react";
 import { useIsMobile } from "../hooks/isMobile";
 import { keyframes } from '@emotion/react';
 import { useNetwork, useSwitchNetwork } from 'wagmi';
-import { optimism, optimismGoerli, mainnet, sepolia } from 'wagmi/chains';
+import { optimism, mainnet, sepolia } from 'wagmi/chains';
+import { optimismSepolia } from '../config/wagmi';
 
 export const Header = () => {
   const { soundEnabled, toggleSound } = useAppState();
@@ -46,7 +47,7 @@ export const Header = () => {
         { name: "Ethereum", chain: mainnet }
       ]
     : [
-        { name: "Optimism Goerli", chain: optimismGoerli },
+        { name: "Optimism Sepolia", chain: optimismSepolia },
         { name: "Sepolia", chain: sepolia }
       ];
   

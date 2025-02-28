@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNetwork, useSwitchNetwork } from 'wagmi';
-import { optimism, optimismGoerli, sepolia, mainnet } from 'wagmi/chains';
+import { optimism, sepolia, mainnet } from 'wagmi/chains';
+import { optimismSepolia } from '../config/wagmi';
 import { useToast } from '@chakra-ui/react';
 
 export const NetworkWarning = () => {
@@ -8,7 +9,7 @@ export const NetworkWarning = () => {
   const { switchNetwork } = useSwitchNetwork();
   const toast = useToast();
   
-  const targetChain = import.meta.env.DEV ? optimismGoerli : optimism;
+  const targetChain = import.meta.env.DEV ? optimismSepolia : optimism;
   const settlementChain = import.meta.env.DEV ? sepolia : mainnet;
 
   useEffect(() => {
@@ -19,7 +20,7 @@ export const NetworkWarning = () => {
       toast({
         title: 'Unsupported Network',
         description: import.meta.env.DEV 
-          ? 'Please switch to Optimism Goerli or Sepolia'
+          ? 'Please switch to Optimism Sepolia or Sepolia'
           : 'Please switch to Optimism or Ethereum Mainnet',
         status: 'warning',
         duration: 5000,

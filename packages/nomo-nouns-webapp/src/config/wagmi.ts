@@ -6,10 +6,37 @@ import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
 import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
 
+// Define Optimism Sepolia manually since it is not in the old wagmi version
+export const optimismSepolia = {
+  id: 11155420,
+  name: 'Optimism Sepolia',
+  network: 'optimism-sepolia',
+  nativeCurrency: {
+    name: 'Sepolia Ether',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://sepolia.optimism.io'],
+    },
+    public: {
+      http: ['https://sepolia.optimism.io'],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: 'Optimism Explorer',
+      url: 'https://sepolia-optimism.etherscan.io',
+    },
+  },
+  testnet: true,
+};
+
 export const getClient = () => {
   const { chains, provider, webSocketProvider } = configureChains(
     [
-      import.meta.env.DEV ? optimismGoerli : optimism,
+      import.meta.env.DEV ? optimismSepolia : optimism,
       import.meta.env.DEV ? sepolia : mainnet
     ],
     [
@@ -17,7 +44,6 @@ export const getClient = () => {
         apiKey: import.meta.env.VITE_ALCHEMY_APP_KEY,
         priority: 0,
       }),
-      
     ],
     { pollingInterval: 60000 }
   );

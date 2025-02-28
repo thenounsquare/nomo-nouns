@@ -17,11 +17,13 @@ import {
   getGoerliSdk,
   getOptimismSdk,
   getOptimisticGoerliSdk,
+  getOptimismSepoliaSdk,
 } from "nomo-nouns-contract-sdks";
 import { useQuery } from "react-query";
 import { useToast } from "@chakra-ui/react";
 import { getClient } from "../config/wagmi";
-import { optimism, optimismGoerli } from "wagmi/chains";
+import { optimism } from "wagmi/chains";
+import { optimismSepolia } from "../config/wagmi";
 
 export const match = () => {
   const database = useFirebaseState((state) => state.db);
@@ -167,7 +169,7 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
   
   const { chain } = useNetwork();
   const { switchNetwork } = useSwitchNetwork();
-  const targetChain = import.meta.env.PROD ? optimism : optimismGoerli;
+  const targetChain = import.meta.env.PROD ? optimism : optimismSepolia;
   const { data: signer } = useSigner();
   const toast = useToast();
   const mintingRef = useRef(false); // Prevent duplicate minting attempts
@@ -215,7 +217,7 @@ export const useMintNomo = (match: SellingMatch | FinishedMatch) => {
     try {
       const { nomoToken } = import.meta.env.PROD
         ? getOptimismSdk(signer)
-        : getOptimisticGoerliSdk(signer);
+        : getOptimismSepoliaSdk(signer);
         
       const mintPrice = getMintPrice(Math.floor(Date.now() / 1000), match);
       const { hash } = match.electedNomoTally.block;
