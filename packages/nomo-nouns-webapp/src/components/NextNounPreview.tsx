@@ -3,15 +3,18 @@ import { Heading, VStack, Text, Box, Center, HStack, Divider, Button } from '@ch
 import { useLatestBlock } from '../hooks/useLatestBlock';
 import { ImageData, getNounData, getNounSeedFromBlockHash } from '@nomonouns/assets';
 import { buildSVG } from '@nouns/sdk';
-import { mainnet } from 'wagmi/chains';
+import { mainnet, sepolia } from 'wagmi/chains';
 import { useNounsAuction } from '../hooks/useNounsAuction';
 import { NomoLoading } from './NomoLoading';
 import { getDatabase, ref, onValue } from 'firebase/database';
 import { createPublicClient, http } from 'viem';
 
+const settlementChain = import.meta.env.PROD ? mainnet : sepolia;
+const networkName = settlementChain.id === 1 ? 'mainnet' : 'sepolia';
+
 const mainnetClient = createPublicClient({
-  chain: mainnet,
-  transport: http(`https://eth-mainnet.g.alchemy.com/v2/${import.meta.env.VITE_ALCHEMY_APP_KEY}`)
+  chain: settlementChain,
+  transport: http(`https://eth-${networkName}.g.alchemy.com/v2/${import.meta.env.VITE_ALCHEMY_APP_KEY}`)
 });
 
 const NOUNS_AUCTION_ADDRESS = '0x830BD73E4184ceF73443C15111a1DF14e495C706';
