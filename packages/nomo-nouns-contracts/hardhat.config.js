@@ -40,14 +40,20 @@ const config = {
             url: `https://opt-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
             accounts: process.env.MNEMONIC
                 ? { mnemonic: process.env.MNEMONIC }
-                : [process.env.WALLET_PRIVATE_KEY!].filter(Boolean),
+                : [process.env.WALLET_PRIVATE_KEY].filter(Boolean),
         },
         optimism_mainnet: {
             url: `https://opt-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_OP_MAINNET_API_KEY}`,
-              accounts: process.env.MNEMONIC
+            accounts: process.env.MNEMONIC
                 ? { mnemonic: process.env.MNEMONIC }
-                : [process.env.WALLET_PRIVATE_KEY!].filter(Boolean),
+                : [process.env.WALLET_PRIVATE_KEY].filter(Boolean),
             },
+        optimismSepolia: {
+            url: `https://opt-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+            accounts: process.env.MNEMONIC
+                ? { mnemonic: process.env.MNEMONIC }
+                : [process.env.WALLET_PRIVATE_KEY].filter(Boolean),
+        },
         // "mainnet-fork": {
         //   // url: "http://localhost:8545",
         //   forking: {
@@ -61,6 +67,7 @@ const config = {
           mainnet: process.env.ETHERSCAN_API_KEY,
           optimism_mainnet: process.env.OP_ETHERSCAN_API_KEY,
           optimisticGoerli: process.env.OP_ETHERSCAN_API_KEY,
+          optimismSepolia: process.env.OP_ETHERSCAN_API_KEY,
         }
     },
     abiExporter: {

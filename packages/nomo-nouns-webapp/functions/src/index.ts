@@ -1,3 +1,6 @@
+import { loadEnvironment } from '../loadEnv';
+loadEnvironment();
+
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { env } from "node:process";
@@ -215,7 +218,7 @@ const startNewMatch = async (
 
   const mintingIncreaseInterval = await nomoToken
     .mintingIncreaseInterval()
-    .then((interval) => interval.toNumber());
+    .then((interval: ethers.BigNumber) => interval.toNumber());
   const mintingPriceIncreasePerInterval =
     await nomoToken.mintingPriceIncreasePerInterval();
   const mintingStartPrice = await nomoToken.mintingStartPrice();

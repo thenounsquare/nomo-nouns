@@ -319,7 +319,9 @@ export interface ERC721A extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string]>;
 
-    totalSupply(overrides?: CallOverrides): Promise<[BigNumber]>;
+    totalSupply(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber] & { result: BigNumber }>;
 
     transferFrom(
       from: PromiseOrValue<string>,

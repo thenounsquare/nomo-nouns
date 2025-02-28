@@ -1,6 +1,7 @@
 import { configureChains, createClient } from "wagmi";
 import { optimismGoerli, optimism, mainnet, sepolia } from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
+import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
@@ -40,9 +41,20 @@ export const getClient = () => {
       import.meta.env.DEV ? sepolia : mainnet
     ],
     [
+      // Add a JSON RPC provider specifically for Optimism Sepolia
+      jsonRpcProvider({
+        rpc: (chain) => {
+          if (chain.id === optimismSepolia.id) {
+            return { http: 'https://sepolia.optimism.io' };
+          }
+          return null;
+        },
+        priority: 0,
+      }),
+      // Keep Alchemy provider for other networks
       alchemyProvider({
         apiKey: import.meta.env.VITE_ALCHEMY_APP_KEY,
-        priority: 0,
+        priority: 1,
       }),
     ],
     { pollingInterval: 60000 }

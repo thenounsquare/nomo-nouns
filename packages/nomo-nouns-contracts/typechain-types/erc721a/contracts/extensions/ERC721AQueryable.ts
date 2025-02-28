@@ -336,7 +336,11 @@ export interface ERC721AQueryable extends BaseContract {
     explicitOwnershipOf(
       tokenId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<[IERC721A.TokenOwnershipStructOutput]>;
+    ): Promise<
+      [IERC721A.TokenOwnershipStructOutput] & {
+        ownership: IERC721A.TokenOwnershipStructOutput;
+      }
+    >;
 
     explicitOwnershipsOf(
       tokenIds: PromiseOrValue<BigNumberish>[],
@@ -406,7 +410,9 @@ export interface ERC721AQueryable extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber[]]>;
 
-    totalSupply(overrides?: CallOverrides): Promise<[BigNumber]>;
+    totalSupply(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber] & { result: BigNumber }>;
 
     transferFrom(
       from: PromiseOrValue<string>,

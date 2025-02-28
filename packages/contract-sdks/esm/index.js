@@ -9,6 +9,8 @@ import optimisticGoerli_nomoToken_abi from '../eth-sdk/abis/optimisticGoerli/nom
 import optimisticGoerli_nomoSeeder_abi from '../eth-sdk/abis/optimisticGoerli/nomoSeeder.json';
 import optimism_nomoToken_abi from '../eth-sdk/abis/optimism/nomoToken.json';
 import optimism_nomoSeeder_abi from '../eth-sdk/abis/optimism/nomoSeeder.json';
+import optimismSepolia_nomoToken_abi from '../eth-sdk/abis/optimismSepolia/nomoToken.json';
+import optimismSepolia_nomoSeeder_abi from '../eth-sdk/abis/optimismSepolia/nomoSeeder.json';
 export function getContract(address, abi, defaultSignerOrProvider) {
     return new Contract(address, abi, defaultSignerOrProvider);
 }
@@ -36,5 +38,11 @@ export function getOptimismSdk(defaultSignerOrProvider) {
     return {
         "nomoToken": getContract('0x1464eBBf9ecd642d42Db8e8827919fdd4A786987', optimism_nomoToken_abi, defaultSignerOrProvider),
         "nomoSeeder": getContract('0xD5CA8ad163a342Bb769C5157934C9F1cC2b0EFC6', optimism_nomoSeeder_abi, defaultSignerOrProvider),
+    };
+}
+export function getOptimismSepoliaSdk(defaultSignerOrProvider) {
+    return {
+        "nomoToken": getContract('0x0a84d15E7Ed226a5934Fa33A1d73d62152d59Da7', optimismSepolia_nomoToken_abi, defaultSignerOrProvider),
+        "nomoSeeder": getContract('0x8E5870B947703E3073C15033Cc7522FDFcc7332A', optimismSepolia_nomoSeeder_abi, defaultSignerOrProvider),
     };
 }

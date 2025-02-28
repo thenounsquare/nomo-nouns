@@ -20,17 +20,17 @@ task("deploy-descriptor", "Deploy Nomo descriptor contract")
     types.string
   )
   .addOptionalParam(
-    "nftDescriptor",
+    "nftdescriptor",
     "The NFT Descriptor lib address",
     "0xB7782eb73D888A62c5a07c488A5d1452395aEd02",
     types.string
   )
   .setAction(
-    async ({ art, renderer, nomoToken, nftDescriptor }, { ethers }) => {
+    async ({ art, renderer, nomoToken, nftdescriptor }, { ethers }) => {
       const DescriptorContract = await ethers.getContractFactory(
         "NomoNounsDescriptorV2",
         {
-          libraries: { NomoNFTDescriptor: nftDescriptor },
+          libraries: { NomoNFTDescriptor: nftdescriptor },
         }
       );
       const descriptorContract = await DescriptorContract.deploy(

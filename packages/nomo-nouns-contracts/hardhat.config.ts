@@ -53,12 +53,19 @@ const config: HardhatUserConfig = {
       ? { mnemonic: process.env.MNEMONIC }
       : [process.env.WALLET_PRIVATE_KEY!].filter(Boolean),
     },
+    optimismSepolia: {
+      url: `https://opt-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+      accounts: process.env.MNEMONIC
+        ? { mnemonic: process.env.MNEMONIC }
+        : [process.env.WALLET_PRIVATE_KEY!].filter(Boolean),
+    },
   },
   etherscan: {
     apiKey: {
       mainnet: process.env.ETHERSCAN_API_KEY,
       optimism_mainnet: process.env.OP_ETHERSCAN_API_KEY,
       optimisticGoerli: process.env.OP_ETHERSCAN_API_KEY,
+      optimismSepolia: process.env.OP_ETHERSCAN_API_KEY,
     },
     customChains: [
       {
@@ -67,6 +74,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api-optimistic.etherscan.io/api",
           browserURL: "https://optimistic.etherscan.io"
+        }
+      },
+      {
+        network: "optimismSepolia",
+        chainId: 11155420,
+        urls: {
+          apiURL: "https://api-sepolia-optimistic.etherscan.io/api",
+          browserURL: "https://sepolia-optimism.etherscan.io"
         }
       }
     ]
