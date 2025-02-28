@@ -31,9 +31,10 @@ const NOUNS_AUCTION_ADDRESS = import.meta.env.PROD
   : '0x488609b7113FCf3B761A05956300d605E8f6BcAf'; // Sepolia
 
 // Create a dedicated mainnet client
+const networkName = settlementChain.id === 1 ? 'mainnet' : 'sepolia';
 const mainnetClient = createPublicClient({
   chain: settlementChain,
-  transport: http(`https://eth-${settlementChain.network}.g.alchemy.com/v2/${import.meta.env.VITE_ALCHEMY_APP_KEY}`)
+  transport: http(`https://eth-${networkName}.g.alchemy.com/v2/${import.meta.env.VITE_ALCHEMY_APP_KEY}`)
 });
 
 export const useNounsAuction = () => {
