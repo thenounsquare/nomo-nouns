@@ -23,3 +23,8 @@ export declare function getOptimismSdk(defaultSignerOrProvider: Signer | provide
     nomoToken: types.optimism.NomoToken;
     nomoSeeder: types.optimism.NomoSeeder;
 };
+export type OptimismSepoliaSdk = ReturnType<typeof getOptimismSepoliaSdk>;
+export declare function getOptimismSepoliaSdk(defaultSignerOrProvider: Signer | providers.Provider): {
+    nomoToken: types.optimismSepolia.NomoToken;
+    nomoSeeder: types.optimismSepolia.NomoSeeder;
+};

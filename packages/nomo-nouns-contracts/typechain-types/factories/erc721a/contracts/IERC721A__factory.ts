@@ -42,12 +42,37 @@ const _abi = [
   },
   {
     inputs: [],
+    name: "NotCompatibleWithSpotMints",
+    type: "error",
+  },
+  {
+    inputs: [],
     name: "OwnerQueryForNonexistentToken",
     type: "error",
   },
   {
     inputs: [],
     name: "OwnershipNotInitializedForExtraData",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "SequentialMintExceedsLimit",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "SequentialUpToTooSmall",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "SpotMintTokenIdTooSmall",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "TokenAlreadyExists",
     type: "error",
   },
   {

@@ -1,3 +1,6 @@
+import { loadEnvironment } from '../loadEnv';
+loadEnvironment();
+
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { env } from "node:process";
@@ -9,6 +12,7 @@ import {
   getMainnetSdk,
   getOptimismSdk,
   getOptimisticGoerliSdk,
+  getOptimismSepoliaSdk,
 } from "nomo-nouns-contract-sdks";
 import { increment } from "firebase/database";
 // import { Bytes, BigNumber } from "ethers";
@@ -49,7 +53,7 @@ type AuctionData = Pick<MatchData, "nounId" | "startTime" | "endTime">;
 export const onAuctionCreated = functions
   .runWith({
     memory: "512MB",
-    secrets: ["JSON_RPC_URL", "OPTIMISM_GOERLI_RPC_URL", "OPTIMISM_RPC_URL"],
+    secrets: ["JSON_RPC_URL", "OPTIMISM_GOERLI_RPC_URL", "OPTIMISM_RPC_URL", "OPTIMISM_SEPOLIA_RPC_URL"],
   })
   .https.onRequest(async (req, resp) => {
     const {
@@ -59,10 +63,11 @@ export const onAuctionCreated = functions
     } = req.body as AuctionPayload;
     const settlementBlockNumber = parseInt(blockNum);
     const optimismProvider = new ethers.providers.AlchemyProvider(
-      env.CHAIN_ID === "420" ? "optimism-goerli" : "optimism",
-      env.CHAIN_ID === "420" ?
-        env.OPTIMISM_GOERLI_RPC_URL! :
-        env.OPTIMISM_RPC_URL!
+      env.CHAIN_ID === "420" ? "optimism-goerli" : 
+      env.CHAIN_ID === "11155420" ? "optimism-sepolia" : "optimism",
+      env.CHAIN_ID === "420" ? env.OPTIMISM_GOERLI_RPC_URL! :
+      env.CHAIN_ID === "11155420" ? env.OPTIMISM_SEPOLIA_RPC_URL! :
+      env.OPTIMISM_RPC_URL!
     );
     const provider = new ethers.providers.JsonRpcBatchProvider(
       env.JSON_RPC_URL!,
@@ -136,9 +141,9 @@ const startNewMatch = async (
   const { auctionHouse } = getMainnetSdk(mainnetProvider);
 
   const { nomoToken, nomoSeeder } =
-    env.CHAIN_ID === "420" ?
-      getOptimisticGoerliSdk(optimismProvider) :
-      getOptimismSdk(optimismProvider);
+    env.CHAIN_ID === "420" ? getOptimisticGoerliSdk(optimismProvider) :
+    env.CHAIN_ID === "11155420" ? getOptimismSepoliaSdk(optimismProvider) :
+    getOptimismSdk(optimismProvider);
 
   console.log("startNewMatchnomoToken", nomoToken.address);
   console.log("startNewMatchauctionHouse", auctionHouse.address);
@@ -213,7 +218,7 @@ const startNewMatch = async (
 
   const mintingIncreaseInterval = await nomoToken
     .mintingIncreaseInterval()
-    .then((interval) => interval.toNumber());
+    .then((interval: ethers.BigNumber) => interval.toNumber());
   const mintingPriceIncreasePerInterval =
     await nomoToken.mintingPriceIncreasePerInterval();
   const mintingStartPrice = await nomoToken.mintingStartPrice();

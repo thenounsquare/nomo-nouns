@@ -2,25 +2,25 @@ const { task, types } = require("hardhat/config");
 
 task("deploy-token", "Deploy Nomo token contract")
   .addOptionalParam(
-    "mintingStartPrice",
+    "mintingstartprice",
     "The minting start price",
     "6900000000000000" /* 0.0069 ETH */,
     types.string
   )
   .addOptionalParam(
-    "mintingIncreaseInterval",
+    "mintingincreaseinterval",
     "The minting increase interval in seconds",
     60 * 15 /* 15 minutes */,
     types.int
   )
   .addOptionalParam(
-    "mintingPriceIncreasePerInterval",
+    "mintingpriceincreaseperinterval",
     "The minting price increase per interval in wei",
     1000000000000000 /* 0.001 ETH */,
     types.int
   )
   .addOptionalParam(
-    "withdrawWallet",
+    "withdrawwallet",
     "Wallet address for withdraw the ETH  ",
     "0x7aCA8C5653834AD797d3a28bfCd6AE0072390Ea8",
     types.string
@@ -47,10 +47,10 @@ task("deploy-token", "Deploy Nomo token contract")
   .setAction(
     async (
       {
-        mintingStartPrice,
-        mintingIncreaseInterval,
-        mintingPriceIncreasePerInterval,
-        withdrawWallet,
+        mintingstartprice,
+        mintingincreaseinterval,
+        mintingpriceincreaseperinterval,
+        withdrawwallet,
         signer,
         seeder,
         descriptor,
@@ -59,8 +59,8 @@ task("deploy-token", "Deploy Nomo token contract")
     ) => {
       const [deployer] = await ethers.getSigners();
 
-      if (!withdrawWallet) {
-        withdrawWallet = deployer.address;
+      if (!withdrawwallet) {
+        withdrawwallet = deployer.address;
       }
 
       if (!signer) {
@@ -69,10 +69,10 @@ task("deploy-token", "Deploy Nomo token contract")
 
       const NomoNouns = await ethers.getContractFactory("NomoNounsToken");
       const nomoNouns = await NomoNouns.deploy(
-        mintingStartPrice,
-        mintingIncreaseInterval,
-        mintingPriceIncreasePerInterval,
-        withdrawWallet,
+        mintingstartprice,
+        mintingincreaseinterval,
+        mintingpriceincreaseperinterval,
+        withdrawwallet,
         signer,
         seeder,
         descriptor
@@ -86,10 +86,10 @@ task("deploy-token", "Deploy Nomo token contract")
       // await hre.run("verify:verify", {
       //   address: nomoNouns.address,
       //   constructorArguments: [
-      //     mintingStartPrice,
-      //     mintingIncreaseInterval,
-      //     mintingPriceIncreasePerInterval,
-      //     withdrawWallet,
+      //     mintingstartprice,
+      //     mintingincreaseinterval,
+      //     mintingpriceincreaseperinterval,
+      //     withdrawwallet,
       //     signer,
       //     seeder,
       //     descriptor,
@@ -100,10 +100,10 @@ task("deploy-token", "Deploy Nomo token contract")
       console.log(
         "verification params:",
         nomoNouns.address,
-        mintingStartPrice,
-        mintingIncreaseInterval,
-        mintingPriceIncreasePerInterval,
-        withdrawWallet,
+        mintingstartprice,
+        mintingincreaseinterval,
+        mintingpriceincreaseperinterval,
+        withdrawwallet,
         signer,
         seeder,
         descriptor

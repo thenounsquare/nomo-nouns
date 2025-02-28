@@ -4,6 +4,8 @@ import type * as mainnet from "./mainnet";
 export type { mainnet };
 import type * as optimism from "./optimism";
 export type { optimism };
+import type * as optimismSepolia from "./optimismSepolia";
+export type { optimismSepolia };
 import type * as optimisticGoerli from "./optimisticGoerli";
 export type { optimisticGoerli };
 export * as factories from "./factories";

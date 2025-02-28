@@ -19,6 +19,10 @@ export default defineConfig({
     optimism: {
       nomoToken:"0x1464eBBf9ecd642d42Db8e8827919fdd4A786987",
       nomoSeeder: "0xD5CA8ad163a342Bb769C5157934C9F1cC2b0EFC6",
+    },
+    optimismSepolia: {
+      nomoToken: "0x0a84d15E7Ed226a5934Fa33A1d73d62152d59Da7",
+      nomoSeeder: "0x8E5870B947703E3073C15033Cc7522FDFcc7332A",
     }
   },
   outputPath: "./",
